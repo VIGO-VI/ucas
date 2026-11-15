@@ -1,0 +1,67 @@
+# ETC1/ETC2 arithmetic, for a QuickETC2 port: what the decoder's widening
+# of a stored channel is, which of the encoder's faster forms agree with
+# it, and the inputs where they do not.  All integers; every equiv is a
+# proof over the whole domain, and every "differ at" names the input.
+
+# 1. widening a stored channel: the decoder repeats the top bits
+e4(v: u4) = u8(v) * 17
+e4bits(v: u4) = u8((u8(v) << 4) | v)
+e4round(v: u4) = u8((u32(v) * 255 + 7) / 15)
+equiv e4bits e4
+equiv e4bits e4round
+w5(v: u5) = u8((u8(v) << 3) | (v >> 2))
+w5mul(v: u5) = u8(8 * u32(v) + (u32(v) >> 2))
+equiv w5 w5mul
+w6(v: u6) = u8((u8(v) << 2) | (v >> 4))
+w6mul(v: u6) = u8(4 * u32(v) + (u32(v) >> 4))
+equiv w6 w6mul
+# the nearest 8-bit value to v*255/31 is not what the decoder produces:
+# an encoder that compares against the rounded one picks the wrong index
+w5round(v: u5) = u8((u32(v) * 255 + 15) / 31)
+equiv w5 w5round
+w6round(v: u6) = u8((u32(v) * 255 + 31) / 63)
+equiv w6 w6round
+# how far the decoder's 5-bit widening is from v*255/31 (0 or 1, never below)
+gap5(v: u5) = i16(w5(v)) - (255 * i16(v)) / 31
+range gap5
+gap6(v: u6) = i16(w6(v)) - (255 * i16(v)) / 63
+range gap6
+
+# 2. quantising 8 bits down to 5, and the error after widening back
+q5(c: u8) = u8((u32(c) * 31 + 127) / 255)
+q5floor(c: u8) = u8(u32(c) * 31 / 255)
+q5fast(c: u8) = u8((u32(c) * 31 + 128) >> 8)
+err5(c: u8) = abs(i16(w5(q5(c))) - i16(c))
+err5f(c: u8) = abs(i16(w5(q5floor(c))) - i16(c))
+range err5
+range err5f
+# dividing by 256 instead of 255 is one off at these inputs
+equiv q5 q5fast
+# and rounding down instead of to nearest doubles the worst error
+equiv q5 q5floor
+
+# 3. differential mode: a 5-bit base and a 3-bit signed delta
+d5(b: u5, d: i3) = u5(i16(b) + i16(d))
+dc5(b: u5, d: i3) = u5(min(31, max(0, i16(b) + i16(d))))
+equiv d5 dc5
+wrap d5
+# a modifier on the widened base: the decoder clamps, u8 wraps
+dwd(b: u5, m: i3) = u8(w5(b) + i16(m))
+dwc(b: u5, m: i3) = u8(min(255, max(0, i16(w5(b)) + i16(m))))
+equiv dwd dwc
+
+# 4. the residual the encoder compares: c - widened base
+res(b: u5, c: u8) = u8(c - w5(b))
+resok(b: u5, c: u8) = i16(c) - i16(w5(b))
+wrap res
+range resok
+
+# 5. squared channel differences: i16 wraps, i32 does not
+sq16(d: i16 in -255..255) = i16(d * d)
+sq32(d: i16 in -255..255) = i32(i32(d) * i32(d))
+wrap sq16
+range sq32
+# three of them: 3*255^2 = 195075 fits in 18 bits, so an i32 accumulator
+# is enough for the whole per-texel error
+sum3(r: i16 in -255..255, g: i16 in -255..255, b: i16 in -255..255) = i32(r)*i32(r) + i32(g)*i32(g) + i32(b)*i32(b)
+range sum3
