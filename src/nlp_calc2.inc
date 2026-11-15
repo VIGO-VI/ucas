@@ -1095,6 +1095,20 @@ c2_finish(void)
 	pf = c2_target_params(&C2.f[0], &tmp);
 	switch (C2.kind) {
 	case K2_DIFF:
+		/*
+		 * "the derivative of x with respect to y": y is not in the
+		 * expression, so ucas would report "it has no variable y".
+		 * Say it in words instead.
+		 */
+		for (k = 0; k < C2.nvars; k++) {
+			int j, param = 0;
+			for (j = 0; j < pf->np; j++)
+				if (!strcmp(sym_str(pf->p[j].name), C2.vars[k]))
+					param = 1;
+			if (!param && !strcmp(subst_ident(F, C2.vars[k], "0x1"), F))
+				nfail("the expression has no variable \"%s\" to "
+				    "differentiate by", C2.vars[k]);
+		}
 		sb_printf(&sb, "diff %s", F);
 		for (k = 0; k < C2.nvars; k++)
 			sb_printf(&sb, " %s", C2.vars[k]);

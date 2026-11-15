@@ -475,6 +475,9 @@ value_name(struct P *p, const char *s, size_t n)
 		return mk_const_r(M_PI / 180);
 	if (n == 3 && !memcmp(s, "inf", 3))
 		return mk_const_r(INFINITY);
+	/* the word, as the English front end writes it */
+	if (n == 8 && !memcmp(s, "infinity", 8))
+		return mk_const_r(INFINITY);
 	return 0;
 }
 

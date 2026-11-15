@@ -1,0 +1,125 @@
+# Numbers and expressions read from English (src/nlp.c).  Number words,
+# fractions, mixed numbers, scale words, powers, roots, factorials,
+# units and the arithmetic words around them.
+
+# words and digits, mixed freely
+what is 2 to the 10th?
+what is two hundred fifty-six divided by 4?
+what is ten thousand minus one?
+what is 1 million divided by 1000?
+what is 2.5 million plus 1?
+what is 1e3 plus 1?
+what is 0.1 plus 0.2?
+what is 1.5 times 4?
+what is 0x2a times 2?
+what is 0b1111 plus 0b1?
+what is negative three squared?
+what is minus 5 plus 8?
+what is 3 plus 4 times 2?
+what is 9 minus 10?
+what is minus 3 times minus 4?
+
+# fractions, percentages and "of"
+what is half of 97?
+what is a third of 120?
+what is 3 quarters of 88?
+what is 2 fifths of 50?
+what is three tenths of 50?
+what's 20 percent of 150?
+what is 30 percent of 80?
+what is 12.5 percent of 400?
+what is 7/8 of 64?
+what is 1 and a half times 8?
+what is two and three quarters times 4?
+what is 3 and a half of 10?
+what is half of a third of 30?
+what is 7 divided by 2?
+what is 7 over 2?
+
+# powers and roots
+what is 2 squared plus 3 cubed?
+what is the square of 12?
+what is the cube of 5?
+what is the fourth power of 3?
+what is 10 to the 5th power?
+what is 2 to the power 8?
+what is 2^3^2?
+what is the square root of 2?
+what is the square root of 144?
+what is the integer square root of 145?
+what is the real square root of 145?
+what is the cube root of 27?
+what is the cube root of -8?
+what is the 4th root of 16?
+what is e to the power of 2?
+what is 2 to the power of 0.5?
+what is the absolute value of minus 7?
+what is the sign of -5?
+what is floor of 3.7?
+what is the ceiling of 3.2?
+what is 3.5 rounded to the nearest integer?
+what is 2.6 rounded up?
+what is 2.6 rounded down?
+what is -2.5 rounded?
+what is the nearest integer to -2.5?
+
+# factorials
+what is 7 factorial?
+what is the factorial of 6?
+what is 5!?
+what is 10 factorial divided by 8 factorial?
+what is 4! / 2!?
+
+# integers: gcd, lcm, remainder, quotient
+what is the gcd of 84 and 36?
+what is the greatest common divisor of 1071 and 462?
+what is the lcm of 6 and 8?
+what is the least common multiple of 21 and 6?
+what is 17 mod 5?
+what is 10 mod 3 plus 1?
+what is 100 mod 7?
+what is the remainder when 100 is divided by 7?
+what is the remainder of 100 divided by 7?
+the quotient of 100 divided by 7
+what is 100 divided by 7?
+
+# aggregates over a list
+what is the sum of 1, 2 and 3?
+what is the product of 2, 3 and 4?
+what is the average of 3, 4 and 5?
+what is the mean of 1, 2, 3 and 4?
+what is the maximum of 3 and 5?
+what is the maximum of 4, 9 and 2?
+what is the minimum of 3 and 5?
+what is 5 squared minus 4 squared?
+what is 2 times (3 plus 4)?
+
+# bits
+what is the number of set bits in 255?
+what is the number of set bits in 0xff?
+what is the number of leading zeros in 1?
+what is the number of trailing zeros in 8?
+what is 8 bitwise or 1?
+what is 6 and 5?
+what is 6 or 3?
+what is the bitwise not of 0?
+what is x shifted left by 3?
+what is 255 shifted right by 4?
+
+# units and functions
+what is 90 degrees in radians?
+what is pi/2 in degrees?
+what is 45 degrees in radians?
+what is sin of 30 degrees?
+what is the sine of pi/2?
+what is cos of 60 degrees?
+what is tan of 45 degrees?
+what is the arcsine of 1?
+what is arctan of 1?
+what is the natural log of e?
+what is log base 2 of 1024?
+what is log base 10 of 1000?
+what is log base 2 of 64?
+what is the square root of x plus 1 where x is a real?
+what is 2 pi?
+what is 3 x squared?

@@ -25,8 +25,11 @@
 #include "bound.h"
 
 #include <math.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
+
+static int64_t d2i64(double v);
 
 struct biv {
 	double lo, hi;
@@ -590,7 +593,7 @@ prove_side(const struct func *f, int up, double *val, struct sbuf *steps)
 			    sizeof rel);
 			bctx_reset(&c);
 			if (!to)
-				to = mk_const_i(f->p[j].ty, (int64_t)((m == 1) == up ?
+				to = mk_const_i(f->p[j].ty, d2i64((m == 1) == up ?
 				    c.hi[j] : c.lo[j]));
 			if (!TY_ISINT(f->p[j].ty) && is_const(to))
 				to = mk_const_r((m == 1) == up ? c.hi[j] : c.lo[j]);
@@ -643,6 +646,22 @@ out:
 	free(c.memo);
 	free(c.done);
 	return ok;
+}
+
+/*
+ * An endpoint back to a machine integer.  The interval's ends are
+ * doubles, and a full i64/i64 domain's upper end is 2^63 as a double:
+ * casting that is undefined and used to come out as INT64_MIN, which made
+ * "range of n for an integer n" prove the maximum at the lower end.
+ */
+static int64_t
+d2i64(double v)
+{
+	if (!(v > -9223372036854775808.0))	/* also NaN */
+		return INT64_MIN;
+	if (v >= 9223372036854775808.0)
+		return INT64_MAX;
+	return (int64_t)v;
 }
 
 int

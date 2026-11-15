@@ -1,0 +1,26 @@
+# Deferred questions: the protocol the Discord bot uses (src/nlp.c).
+# A question goes after an \x1eask marker and the run stops; the front
+# end asks the user and runs the text again with one \x1eanswer line per
+# answer so far.  Here the answers are in the file, in the order the
+# questions come.
+defer
+
+# one answer, and the meaning is kept for the rest of the session
+answer 2
+what is the log of 8?
+what is the log of 1024?
+
+# a type answered, then the same word needs no question
+answer 2
+what is the range of x for a byte x?
+what is the range of x plus 1 for a byte x?
+
+# an answer that is not one of the choices: the default is taken
+answer 1
+answer 99
+what is the square root of x plus 1 where x is a 4-bit unsigned x?
+
+# no answer left for the next question: it is asked, and the run stops
+what is the square root of x plus 1 where x is a 4-bit unsigned x?
+what is x plus 1 where x is a 4-bit unsigned x?
+what is 2 plus 2?

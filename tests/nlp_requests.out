@@ -1,0 +1,769 @@
+> range of x squared for x from -3 to 3
+  ucas: it(x in -3..3) = x^2
+  ucas: range it
+range of it -> int:
+  0..9
+  fits in u4
+  over all 7 points of the domain
+> what is the range of x squared for x from -3 to 3?
+  ucas: it(x in -3..3) = x^2
+  ucas: range it
+range of it -> int:
+  0..9
+  fits in u4
+  over all 7 points of the domain
+> what is the range of sin theta for theta between 0 and pi?
+  ucas: it(theta in 0..pi) = sin(theta)
+  ucas: range it
+range of it:
+  [0, 1]   min at theta ≈ 0, max at theta ≈ 1.570796327
+  grid of 20001 points over [0, 3.14159], extrema refined at critical points
+> what is the range of the integer square root of an 8-bit unsigned x?
+  ucas: it(x: u8) = isqrt(x)
+  ucas: range it
+range of it -> u8:
+  0..15   (16 distinct values)
+  values: 0..15
+  fits in u4
+  over all 256 points of the domain
+> what is the range of x plus 1 for a 4-bit unsigned x?
+  ucas: it(x: u4) = x + 1
+  ucas: range it
+range of it -> u4:
+  0..15   (16 distinct values)
+  values: 0..15
+  fits in u4
+  over all 16 points of the domain
+> what is the domain of 1/x?
+  ucas: it(x) = 1/x
+  ucas: domain it
+domain of it:
+  x: real (default [-10, 10])
+  requires x != 0  (in 1/x)
+  defined on (numerically, grid of 20001 over [-10, 10]):
+    x in [-10, 0)
+    x in (0, 10]
+    except x ≈ 0  (x = 0)
+> where is 1/(x-1) discontinuous?
+  ucas: it(x) = 1/(x - 1)
+  ucas: discontinuities it
+discontinuities of it:
+  undefined at x = 1 (the ends located numerically)
+  x = 1: infinite (a pole): -inf from the left, +inf from the right
+  proved: built from operations that are continuous where defined, so it is continuous on its domain; points outside it located numerically; x has no range: searched [-10, 10]
+> does 2x + 3 overflow for a signed byte x?
+  ucas: it(x: i8) = 2*x + 3
+  ucas: wrap it
+wrap analysis of it:
+  2x   (i8)
+      nuw fails: unsigned wrap at 128 points, e.g. x=-128
+      nsw fails: signed wrap at 128 points, e.g. x=-128  <- UB in C; a compiler assumes it cannot happen
+  2x + 3   (i8)
+      nuw fails: unsigned wrap at 2 points, e.g. x=-1
+      nsw fails: signed wrap at 2 points, e.g. x=-65  <- UB in C; a compiler assumes it cannot happen
+  end to end: differs from the mathematical result at 128 points, e.g. x=-128
+      exact for: -65..62
+  over all 256 points of the domain
+> is x squared ever negative for a signed byte x?
+  ucas: it(x: i8) = x^2
+  ucas: range it
+range of it -> i8:
+  -127..121   (44 distinct values)
+  values: -127, -124, -119, -112..-111, -103, -95, -92, -87, -79, -71, -63, -60, -55, -47, -39, -31, -28, -23, -15, -7, 0..1, 4, 9, 16..17, ...
+  fits in i8
+  over all 256 points of the domain
+> does x times 2 plus 1 overflow for a signed byte x?
+  ucas: it(x: i8) = x*2 + 1
+  ucas: wrap it
+wrap analysis of it:
+  2x   (i8)
+      nuw fails: unsigned wrap at 128 points, e.g. x=-128
+      nsw fails: signed wrap at 128 points, e.g. x=-128  <- UB in C; a compiler assumes it cannot happen
+  2x + 1   (i8)
+      nuw holds
+      nsw holds (C requires it: signed overflow is UB)
+  end to end: differs from the mathematical result at 128 points, e.g. x=-128
+      exact for: -64..63
+  over all 256 points of the domain
+> what are the critical points of x cubed minus 3x?
+  ucas: it(x) = x^3 - 3*x
+  ucas: crit it
+critical points of it:
+  it' = 3x^2 - 3
+  x ≈ -1: local maximum, it = 2
+  x ≈ 1: local minimum, it = -2
+  searched [-10, 10] (default; give x a range)
+> where is x cubed minus 3x increasing?
+  ucas: it(x) = x^3 - 3*x
+  ucas: monotonic it
+monotonic it:
+  not monotonic on all real x
+  maximal intervals of monotonicity:
+    x in (-inf, -1]: increasing
+    x in [-1, 1]: decreasing
+    x in [1, inf): increasing
+  witness: x = -2 < x = -1 but f(-2) = -2 < f(-1) = 2 (not decreasing)
+  witness: x = -1 < x = 1 but f(-1) = 2 > f(1) = -2 (not increasing)
+  proved symbolically: it' = 3x^2 - 3; its real roots: -1, 1 (exact); f' keeps its sign between roots of odd multiplicity
+> where is x cubed minus 3x decreasing?
+  ucas: it(x) = x^3 - 3*x
+  ucas: monotonic it
+monotonic it:
+  not monotonic on all real x
+  maximal intervals of monotonicity:
+    x in (-inf, -1]: increasing
+    x in [-1, 1]: decreasing
+    x in [1, inf): increasing
+  witness: x = -2 < x = -1 but f(-2) = -2 < f(-1) = 2 (not decreasing)
+  witness: x = -1 < x = 1 but f(-1) = 2 > f(1) = -2 (not increasing)
+  proved symbolically: it' = 3x^2 - 3; its real roots: -1, 1 (exact); f' keeps its sign between roots of odd multiplicity
+> the derivative of sin x squared with respect to x
+  ucas: it(x) = sin(x^2)
+  ucas: diff it x
+d/dx it = 2x*cos(x^2)
+  holds for every real x
+  check: matches central differences at 201 points (max relative difference 3e-10)
+> the derivative of x squared times sin x
+  ucas: it(x) = x^2*sin(x)
+  ucas: diff it
+d/dx it = 2x*sin(x) + x^2*cos(x)
+  holds for every real x
+  check: matches central differences at 201 points (max relative difference 3e-15)
+> what is the second derivative of x cubed?
+  ucas: it(x) = x^3
+  ucas: diff it 2
+d/dx it = 3x^2
+d²/dx² it = 6x
+  holds for every real x
+  check: each order matches central differences at 402 points (max relative difference 2e-15)
+> what is the derivative of myabs?
+  note: I don't know the word "myabs": read as a variable, not a mistake (stop here) (rephrase it, or name variables with one or two letters)
+  ucas: it(myabs) = myabs
+  ucas: diff it
+d/dmyabs it = 1
+  holds for every real myabs
+  check: matches central differences at 201 points (max relative difference 1e-15)
+> d/dx of x^3
+  ucas: it(x) = x^3
+  ucas: diff it x
+d/dx it = 3x^2
+  holds for every real x
+  check: matches central differences at 201 points (max relative difference 2e-15)
+> the partial derivative of x^2 y with respect to y
+  ucas: it(x, y) = x^2*y
+  ucas: diff it y
+∂/∂y it = x^2
+  holds wherever the formula is defined
+  check: matches central differences at 100 points (max relative difference 4e-13)
+> the gradient of x^2 y at (1, 2)
+  ucas: it(x, y) = x^2*y
+  ucas: grad it at 1, 2
+∇ it = (2x*y, x^2)
+  ∂/∂x it = 2x*y
+  ∂/∂y it = x^2
+  holds wherever the formulas are defined
+  check: every entry matches central differences at 200 points (max relative difference 4e-13)
+  at (x = 1, y = 2): (4, 1), |∇| = 4.123105626
+> the laplacian of x^2 y^2
+  ucas: it(x, y) = x^2*y^2
+  ucas: laplacian it
+∇² it = 2y^2 + 2x^2
+  ∂²/∂x² it = 2y^2
+  ∂²/∂y² it = 2x^2
+  holds wherever the formulas are defined
+  check: every entry matches central differences at 400 points (max relative difference 4e-13)
+> the limit of sin x / x as x approaches 0
+  note: what does "sin" apply to: read as sin(x) / ..., not sin(x / ...) (say "sin the quantity ..." for the second)
+  ucas: it(x) = sin(x)/x
+  ucas: limit it x -> 0
+limit of it as x -> 0:
+  0/0: L'Hôpital: lim (cos(x))/(1) = lim cos(x)
+  = 1 (from both sides)
+  numeric from the left (a - h, h = 0.1*2^-k, k = 0..21): 0.9983341665, 0.9999934896, 0.9999999746, 0.9999999999, 1, 1
+    extrapolated (Richardson): 1 (estimated error 0): agrees
+  numeric from the right (a + h, h = 0.1*2^-k, k = 0..21): 0.9983341665, 0.9999934896, 0.9999999746, 0.9999999999, 1, 1
+    extrapolated (Richardson): 1 (estimated error 0): agrees
+> the limit of (1 - cos x)/x^2 as x approaches 0
+  ucas: it(x) = (1 - cos(x))/x^2
+  ucas: limit it x -> 0
+limit of it as x -> 0:
+  0/0: L'Hôpital: lim (sin(x))/(2x) = lim sin(x)/(2x)
+  0/0: L'Hôpital: lim (cos(x))/(2) = lim cos(x)/2
+  = 1/2 (from both sides)
+  numeric from the left (a - h, h = 0.1*2^-k, k = 0..21): 0.4995834722, 0.4999983724, 0.4999999936, 0.5, 0.4999999888, 0.5000114441
+    extrapolated (Richardson): 0.5 (estimated error 4e-14): agrees
+  numeric from the right (a + h, h = 0.1*2^-k, k = 0..21): 0.4995834722, 0.4999983724, 0.4999999936, 0.5, 0.4999999888, 0.5000114441
+    extrapolated (Richardson): 0.5 (estimated error 4e-14): agrees
+> lim x->0 of (1 - cos x)/x^2
+limit of (1 - cos(x))/x^2 as x -> 0:
+  0/0: L'Hôpital: lim (sin(x))/(2x) = lim sin(x)/(2x)
+  0/0: L'Hôpital: lim (cos(x))/(2) = lim cos(x)/2
+  = 1/2 (from both sides)
+  numeric from the left (a - h, h = 0.1*2^-k, k = 0..21): 0.4995834722, 0.4999983724, 0.4999999936, 0.5, 0.4999999888, 0.5000114441
+    extrapolated (Richardson): 0.5 (estimated error 4e-14): agrees
+  numeric from the right (a + h, h = 0.1*2^-k, k = 0..21): 0.4995834722, 0.4999983724, 0.4999999936, 0.5, 0.4999999888, 0.5000114441
+    extrapolated (Richardson): 0.5 (estimated error 4e-14): agrees
+> the taylor series of exp x about 0 to order 4
+  ucas: it(x) = exp(x)
+  ucas: taylor it order 4
+Maclaurin (Taylor at 0) series of it at x = 0, through order 4:
+  it = 1 + x + x^2/2 + x^3/6 + x^4/24 + O(x^5)
+  as x -> 0; coefficients c_k = f^(k)(0)/k!: 1 1 1/2 1/6 1/24
+  check: the coefficients agree with Taylor-jet arithmetic (long double) to 0
+  check: |f - P| = 8.47e-08 at x = 0 ± 1/10, 2.63e-09 at ± 1/20, 8.17e-11 at ± 1/40 (shrinks like h^5.0; expected >= 5)
+> the maclaurin series of sin x to order 5
+  ucas: it(x) = sin(x)
+  ucas: taylor it order 5
+Maclaurin (Taylor at 0) series of it at x = 0, through order 5:
+  it = x - x^3/6 + x^5/120 + O(x^6)
+  as x -> 0; coefficients c_k = f^(k)(0)/k!: 0 1 0 -1/6 0 1/120
+  check: the coefficients agree with Taylor-jet arithmetic (long double) to 0
+  check: |f - P| = 1.98e-11 at x = 0 ± 1/10, 1.55e-13 at ± 1/20, 1.21e-15 at ± 1/40 (shrinks like h^7.0; expected >= 6)
+> the antiderivative of x squared
+  ucas: it(x) = x^2
+  ucas: antiderivative it
+∫ x^2 dx
+  = x^3/3 + C
+  check: d/dx of it equals the integrand at 401 points of [-10, 10] (max difference 1.4e-14)
+> integrate x squared from 0 to 1
+  ucas: it(x) = x^2
+  ucas: integrate it from 0 to 1
+∫ x^2 dx
+  = x^3/3 + C
+  check: d/dx of it equals the integrand at 401 points of [0, 1] (max difference 1.1e-16)
+  from 0 to 1: F(1) - F(0) = 0.333333333333333
+  numeric (adaptive Gauss-Kronrod 7-15, 15 evaluations): 0.333333333333333, estimated error 3.7e-15
+  the two agree to 0
+> what is the integral of sin x from 0 to pi?
+  ucas: it(x) = sin(x)
+  ucas: integrate it from 0 to pi
+∫ sin(x) dx
+  = -cos(x) + C
+  check: d/dx of it equals the integrand at 401 points of [0, 3.14159] (max difference 0)
+  from 0 to 3.14159: F(3.14159) - F(0) = 2
+  numeric (adaptive Gauss-Kronrod 7-15, 15 evaluations): 2, estimated error 2.2e-14
+  the two agree to 0
+> what is the area under x^2 from 0 to 4 nofile?
+  ucas: area x^2 from 0 to 4 nofile
+area under x^2
+  x in [0, 4]: given
+  ∫ x^2 dx from 0 to 4
+  antiderivative: x^3/3
+  exact: F(4) - F(0) = 21.3333333333333 = 64/3
+  numeric (adaptive Gauss-Kronrod 7-15, 15 evaluations): 21.3333333333333, estimated error 2.3e-13
+  the two agree to 0
+  above the axis everywhere: the area is 64/3 = 21.33
+  image: 640x440, 8281 bytes
+  (nofile: GIF checksum 9632b106)
+> avg(a: u8, b: u8) = (a + b) / 2
+> is x squared equal to x times x?
+  ucas: it(x) = x^2
+  ucas: that(x) = x*x
+  ucas: equiv it that
+it and that are equal on the domain of it (exhaustive)
+> are (x + y)^2 and x^2 + 2xy + y^2 equivalent for u8 x and y?
+  note: read "xy" as x*y (both are variables here; name it to use it whole)
+  ucas: it(x: u8, y: u8) = (x + y)^2
+  ucas: that(x: u8, y: u8) = x^2 + 2*(x*y) + y^2
+  ucas: equiv it that
+it and that are equal on the domain of it (exhaustive)
+> is (x & y) + ((x xor y) >> 1) equal to (x + y) / 2 for u8 x and y?
+  ucas: it(x: u8, y: u8) = (x & y) + ((x xor y) >> 1)
+  ucas: that(x: u8, y: u8) = (x + y)/2
+  ucas: equiv it that
+it and that differ at 32640 points, e.g. x=255, y=1: 128 vs 0
+> is avg commutative?
+  note: commutative: avg(a, b) = avg(b, a) everywhere?
+  ucas: lhs(a: u8, b: u8) = avg(a, b)
+  ucas: rhs(a: u8, b: u8) = avg(b, a)
+  ucas: equiv lhs rhs
+lhs and rhs are equal on the domain of lhs (exhaustive)
+> is avg associative?
+  note: associative: avg(avg(a, b), c) = avg(a, avg(b, c)) everywhere?
+  ucas: lhs(a: u8, b: u8, a3: u8) = avg(avg(a, b), a3)
+  ucas: rhs(a: u8, b: u8, a3: u8) = avg(a, avg(b, a3))
+  ucas: equiv lhs rhs
+lhs and rhs differ at 64452 points of the sample, e.g. a=255, b=0, a3=2: 64 vs 0
+> are x plus y and y plus x equivalent for u8 x and y?
+  ucas: it(x: u8, y: u8) = x + y
+  ucas: that(x: u8, y: u8) = y + x
+  ucas: equiv it that
+it and that are equal on the domain of it (exhaustive)
+> is x squared even?
+  note: "even": read as an even function, f(-x) = f(x), not an even number for every input (say "an odd function" or "always odd")
+  ucas: it(x) = x^2
+  ucas: parity it
+parity of it:
+  even: f(-x) = f(x)
+  proved symbolically (parity rules: x is odd; sums keep a common parity, products multiply it; sin/tan/atan preserve it, cos/abs make it even)
+> is sin x periodic?
+  ucas: it(x) = sin(x)
+  ucas: periodic it
+periodic it:
+  yes: fundamental period 2*pi ≈ 6.283185307
+  proved symbolically: sin(x) has period 2*pi; x occurs only inside them, so f(x + p) = f(x).  Smallest: no p/k (2 <= k <= 64) is a period (checked at 997 points)
+> find the period of sin(2x)
+  ucas: it(x) = sin(2*x)
+  ucas: period it
+period of it:
+  fundamental period pi ≈ 3.141592654
+  proved symbolically: sin(2x) has period pi; x occurs only inside them, so f(x + p) = f(x).  Smallest: no p/k (2 <= k <= 64) is a period (checked at 997 points)
+> rsqrt(x: f32 in 0.01..100) = 1/sqrt(x)
+> guess(x: f32, K: u32) = asfloat(K - (asuint(x) >> 1))
+> find the best constant for guess to approximate rsqrt
+  ucas: fit guess ~ rsqrt
+fit guess to rsqrt (max relative error, 4096 sample points):
+  K = 1597465581  (0x5f3763ed)
+  objective 0.0342066
+  asfloat(1597465581 - (asuint(x) >> 1))
+  max abs error 0.341896 at x=0.0100000007
+  max rel error 0.0342164 (3.42%) at x=59.6959572
+  mean rel error 0.0231791 over 65536 points
+  max 564234 ulp
+> quake(x: f32) = asfloat(1597463007 - (asuint(x) >> 1))
+> how accurate is quake as an approximation of rsqrt?
+  ucas: error quake ~ rsqrt
+error of quake against rsqrt:
+  max abs error 0.339441 at x=0.0100000007
+  max rel error 0.0343756 (3.44%) at x=0.932435215
+  mean rel error 0.0230677 over 65536 points
+  max 566808 ulp
+  rounding, first order in u = 2^-24: 0 rounded operations, each taken as correctly rounded; relative to the value, the largest over 4088 inputs
+    bit casts: 2, exact: integers are, and a float whose bits are read carries no rounding error
+    worst case  0 (0 u): every error at its bound and aligned, u sum |c_i|
+    probable    no better than the worst case: 4 u sqrt(sum c_i^2) is 0 u here (it gains from about 16 operations of similar weight on)
+    expected    0 (0 u): the root mean square if they are independent and uniform in [-u, u]
+> find 3 cheaper implementations of x squared mod 7
+  ucas: it(x) = x^2 % 7
+  ucas: find it 3
+  note: x has no type: inferred int from the integer operations in the body
+find it: 4 points (sampled; matches verified on the whole domain), computing in int, costs from gt1030
+  dropping operations of it (cost 29 as written; each checked on the whole domain):
+  cost 3   x^2                                      drops % 7 (sampled, not proved)
+  cost 2   x + (x & 2)                              exact (sampled)
+  cost 2   (x xor x + x) & -3                       mask (sampled)
+  cost 2   (x + 2 | 2) & 5                          exact (sampled)
+  [searched every term up to cost 3: 10617 distinct columns; 'more' continues]
+> days(m: u8 in 1..12) = match m { 2 => 28, 4 | 6 | 9 | 11 => 30, _ => 31 }
+> find cheaper implementations of days
+  ucas: find days 10
+  note: the result is int: searching in u8
+find days: 12 points, computing in u8, costs from gt1030
+  rewrites the model prices lower (each derived, with what it holds under):
+  cost 6   int(0x3bbeecc >> (u32(m) << 1) & 3) + 28 the map m == 2 ? 28 : m == 4 || m == 6 || m == 9 || m == 11 ? 30 : 3… (1 more characters) of m as a table in one constant (12 entries of 2 bits) (derived; checked on every point)
+      holds where m in [1, 12] (its range)
+      m == 2 ? 28 : m == 4 || m == 6 || m == 9 || m == 11 ? 30 : 3… (1 more characters) at m = 1..12 is [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31] (evaluated at each of the 12)
+      bits [2*i, 2*i + 2) of 0x3bbeecc hold the value at m = i, less the least value: shifting right by that many bits times m and masking reads it
+  cost 6   u8(0x3bbeecc >> (u32(m) << 1) & 3) + 28  packed table in one constant
+  cost 8   [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31][m - 1] lookup table (baseline)
+  [searched every term up to cost 5: 1398101 distinct columns, bank full; 'more' continues]
+> what is the cost of x * 3 on zen4?
+  ucas: it(x) = x*3
+  ucas: cost it model zen4
+cost of it under zen4: 3 (1 operations, shared subterms counted once)
+  fmul             1 x 3     = 3
+> what is the cost of (x * 3) >> 1 on zen4?
+  ucas: it(x) = x*3 >> 1
+  ucas: cost it model zen4
+  note: x has no type: inferred int from the integer operations in the body
+cost of it under zen4: 4 (2 operations, shared subterms counted once)
+  shift            1 x 1     = 1
+  imul             1 x 3     = 3
+> give me a table of values of x squared mod 7 for x from 0 to 10
+  ucas: it(x in 0..10) = x^2 % 7
+  ucas: table it
+  x=0  ->  0
+  x=1  ->  1
+  x=2  ->  4
+  x=3  ->  2
+  x=4  ->  2
+  x=5  ->  4
+  x=6  ->  1
+  x=7  ->  0
+  x=8  ->  1
+  x=9  ->  4
+  x=10  ->  2
+> what is the maximum of a and b when a is 3 and b is 5?
+  ucas: max(3, 5)
+5
+> factor x squared minus 1
+  ucas: factor x^2 - 1
+factor x^2 - 1
+  = (x - 1)*(x + 1)
+  check: exact (both sides have the same normal form)
+  (factors are irreducible over the rationals)
+> factorise x^4 - 1
+  ucas: factor x^4 - 1
+factor x^4 - 1
+  = (x - 1)*(x + 1)*(x^2 + 1)
+  check: exact (both sides have the same normal form)
+  (factors are irreducible over the rationals)
+> expand (x+1)^3
+  ucas: expand (x+1)^3
+expand (x + 1)^3
+  = x^3 + 3x^2 + 3x + 1
+  check: exact (both sides have the same normal form)
+> simplify (x^2-1)/(x-1)
+  ucas: simplify (x^2-1)/(x-1)
+simplify (x^2 - 1)/(x - 1)
+  = x + 1
+  holds where x - 1 != 0 (cancelled there)
+  check: exact (both sides have the same normal form)
+> collect the terms of x^2 + 2x + 1 in x
+  ucas: collect x^2 + 2x + 1 in x
+collect x^2 + 2x + 1
+  = x^2 + 2x + 1
+  check: exact (both sides have the same normal form)
+> put 1/x + 1/(x+1) over a common denominator
+  ucas: together 1/x + 1/(x+1)
+together 1/x + 1/(x + 1)
+  = (2x + 1)/(x*(x + 1))
+  check: exact (both sides have the same normal form)
+> partial fraction decomposition of 1/(x^2-1)
+  ucas: apart 1/(x^2-1)
+apart 1/(x^2 - 1)
+  = 1/(2(x - 1)) - 1/(2(x + 1))
+  check: exact (both sides have the same normal form)
+> solve x^2 - 5x + 6 = 0
+  ucas: solve x^2 - 5x + 6 = 0
+solve x^2 - 5x + 6 = 0 for x
+  x = 2
+  x = 3
+  check: each solution substituted (2 values): residual 0
+> solve sin x = 1/2
+  ucas: solve sin x = 1/2
+solve sin x = 1/2 for x
+  x = pi/6 + 2pi*k   (k any integer)
+  x = 5*pi/6 + 2pi*k   (k any integer)
+  check: each solution substituted (10 values, k = -2..2): residual 9.4e-16
+> solve the system x + y = 3, x - y = 1 for x and y
+  ucas: solve x + y = 3, x - y = 1 for x, y
+solve x + y = 3, x - y = 1 for x, y
+  x = 2
+  y = 1
+  check: substituted into every equation: residual 0
+> the gcd of x^2-1 and x^2+2x+1
+  ucas: gcd x^2-1, x^2+2x+1
+gcd x^2 - 1, x^2 + 2x + 1
+  = x + 1
+  check: it divides both exactly, and the cofactors are coprime
+  (normalized: integer coefficients without a common factor, leading coefficient positive)
+> the lcm of x^2-1 and x+1
+  ucas: lcm x^2-1, x+1
+lcm x^2 - 1, x + 1
+  = (x - 1)*(x + 1)
+    = x^2 - 1
+  check: both divide it exactly
+> the discriminant of x^2 - 4
+  ucas: discriminant x^2 - 4
+discriminant x^2 - 4
+  in x (degree 2): 16
+  > 0: two distinct real roots
+  check: lc^(2n-2) * product of (ri - rj)^2 over the roots = 16 (agrees)
+> divide x^3 - 1 by x - 1
+  ucas: divide x^3 - 1 by x - 1
+divide x^3 - 1, x - 1
+  quotient x^2 + x + 1, remainder 0
+  (in x: P = Q*quotient + remainder, deg remainder < 1)
+  check: exact (both sides have the same normal form)
+> substitute x = 2 in x^3 - 1
+x^3 - 1 with x = 2
+  = 7
+  check: exact (both sides have the same normal form)
+> is f monotonic?
+  ucas: it(f) = f
+  ucas: monotonic it
+monotonic it:
+  strictly increasing on all real x
+  proved symbolically: it' = 1; its real roots: none; f' keeps its sign between roots of odd multiplicity
+> is x squared even?
+  note: "even": read as an even function, f(-x) = f(x), not an even number for every input (say "an odd function" or "always odd")
+  ucas: it(x) = x^2
+  ucas: parity it
+parity of it:
+  even: f(-x) = f(x)
+  proved symbolically (parity rules: x is odd; sums keep a common parity, products multiply it; sin/tan/atan preserve it, cos/abs make it even)
+> where does x^3 - x cross zero?
+  ucas: it(x) = x^3 - x
+  ucas: zeros it
+zeros of it:
+  3 zeros:
+    x = -1
+    x = 0
+    x = 1
+  proved: a polynomial of degree 3 has 3 roots counted with multiplicity
+> the asymptotes of 1/(x-1)
+  ucas: it(x) = 1/(x - 1)
+  ucas: asymptotes it
+asymptotes of it:
+  vertical: x = 1 (f -> -inf from the left, +inf from the right)
+  horizontal: y = 0 as x -> ±inf
+  proved symbolically: f = N/D with deg N = 0, deg D = 1; poles are the real roots of D that are roots of N of lower multiplicity (others are holes); at infinity the quotient of N by D
+> identify the equation x^2 + y^2 = 1
+  ucas: identify x^2 + y^2 = 1
+identify x^2 + y^2 = 1:
+  a conic section (degree 2) in x and y
+  A x^2 + B xy + C y^2 + D x + E y + F = 0 with A = 1, B = 0, C = 1, D = 0, E = 0, F = -1
+  discriminant B^2 - 4AC = -4 (elliptic); determinant of the 3x3 matrix -1 (non-degenerate)
+  circle: centre (0, 0), radius 1
+  [coefficients by evaluation at 9 points, the form checked at 30 more: numeric]
+  symmetric about: the y-axis, the x-axis, the origin, the line y = x [numeric, 40 points]
+> what kind of equation is y'' + y = 0?
+  ucas: identify y'' + y = 0
+identify y'' + y = 0:
+  an ordinary differential equation of order 2 in y(t)
+  linear: every y-term appears to the first power [proved: the partial derivatives in y, y', ... do not involve y]
+  homogeneous
+  constant coefficients (and autonomous)
+  characteristic equation: r^2 + 1 = 0, roots ±i
+  homogeneous solutions: y(t) = a combination of cos(t), sin(t)
+  autonomous: the independent variable does not appear explicitly
+  solved for the highest derivative: y'' = -y  (then initial values and: dsolve y)
+> is 1/x bounded on 1 to 2?
+  note: x taken as real on [1, 2] (say "integer x" for whole numbers)
+  ucas: it(x: real in 1..2) = 1/x
+  ucas: bounded it
+bounded it:
+  bounded on [1, 2]
+  above: proved by interval arithmetic: f <= 1; the largest value seen is 1 at x = 1
+  below: proved by interval arithmetic: f >= 0.5; the smallest value seen is 0.5 at x = 2
+> is sin x bounded?
+  ucas: it(x) = sin(x)
+  ucas: bounded it
+bounded it:
+  bounded (on all real x)
+  above: proved by interval arithmetic: f <= 1; the largest value seen is 1 at x = -4.71238898 (~-3*pi/2)
+  below: proved by interval arithmetic: f >= -1; the smallest value seen is -1 at x = -7.853981634 (~-5*pi/2)
+> the inverse of 3 mod 256
+  ucas: inverse 3 mod 256
+3^-1 = 171 mod 256
+  how: extended Euclid: 171*3 - 2*256 = 1
+  check: 3 * 171 = 513 = 2*256 + 1
+> is Z/12 a field?
+  ucas: ring z/12 field
+  a field: no; an integral domain: no (12 is not prime: 2 * 6 = 0 with both nonzero)
+> in GF(2^8) with the AES polynomial multiply 0x57 by 0x83
+  ucas: ring gf(2^8) aes 0x57 * 0x83
+  note: integers are elements in integer notation (the coefficients as base-2 digits): 0x57 = x^6 + x^4 + x^2 + x + 1
+0x57 * 0x83 = 0xc1 = x^7 + x^6 + 1 in GF(2^8, aes)
+  how: carry-less product 0x2b79, reduced mod (x^8 + x^4 + x^3 + x + 1), the AES (Rijndael) polynomial 0x11b
+  check: the same with a second multiplication algorithm (shift-and-add, xtime)
+> the magic number for dividing a u32 by 7
+  ucas: magic 7 u32
+x / 7 for unsigned x: u32
+  m = ceil(2^35 / 7) = 4908534053 (0x124924925, 33 bits), shift s = 3
+  q = floor(x * m / 2^35)
+  proof (Granlund-Montgomery): m*7 = 2^35 + e with e = 3 <= 2^3.  Write x = q*7 + r, 0 <= r < 7.  Then x*m/2^35 = x/7 + x*e/(7*2^35), and x*e/2^35 < 1 because |x| < 2^32, so the extra term is below 1/7: it cannot carry r/7 <= 6/7 past the next integer
+  m has 33 bits, one more than u32: the usual sequence uses m - 2^32 = 0x24924925 and an add that cannot overflow:
+    C:    t = mulhi(x, 0x24924925); q = (t + ((x - t) >> 1)) >> 2;
+    in ucas: (u32((u64(x) * 0x24924925) >> 32) + ((x - u32((u64(x) * 0x24924925) >> 32)) >> 1)) >> 2
+  check: the ucas form above, run by ucas's evaluator in u32, equals x / 7 for the 256 smallest and largest x and 65536 random x (66048 inputs)
+  check: the sequence above, emulated in 32-bit arithmetic, equals x / 7 (C's truncating division) for the ends of the range, both sides of the multiples of d near 0 and near the top, and 2^20 random inputs (1073152 inputs)
+> x congruent to 2 mod 3 and 3 mod 5
+  ucas: crt x = 2 mod 3 , 3 mod 5
+the system
+  x = 2 mod 3: x = 2
+    x = 2 (mod 3)
+  3 mod 5: x = 3
+    x = 3 (mod 5)
+x = 8 (mod 15)
+  how: the Chinese remainder theorem, pairwise (moduli that share factors must agree mod their gcd)
+  check: the solution substituted into every congruence: it holds; brute force over 0..14: 1 solution
+> the polar form of 1 + i
+  ucas: polar 1 + i
+1 + i = sqrt(2)*e^(i*pi/4)
+  = sqrt(2)*(cos(pi/4) + i*sin(pi/4))
+  r = |z| = sqrt(2),  theta = arg z = pi/4
+  theta is the principal argument, -pi < theta <= pi
+  check: equal numerically (1 + 1i, complex arithmetic)
+  check: equal numerically (1 + 1i, complex arithmetic)
+> write (1+2i)/(3-i) in a+bi form
+  ucas: complex (1+2i)/(3-i)
+(1+2i)/(3-i) = 1/10 + 7i/10
+  Re = 1/10,  Im = 7/10
+  check: equal numerically (0.1 + 0.7i, complex arithmetic)
+> real and imaginary parts of e^(ix)
+  ucas: complex e^(ix)
+  note: 'ix' read as i*x (single-letter variables)
+  note: i is the imaginary unit; x is taken as real
+e^(ix) = cos(x) + i*sin(x)
+  Re = cos(x),  Im = sin(x)
+  check: equal at 64 of 64 sample points
+> modulus and argument of 3 + 4i
+  ucas: polar 3 + 4i
+3 + 4i = 5*e^(i*atan(4/3))
+  = 5*(cos(atan(4/3)) + i*sin(atan(4/3)))
+  r = |z| = 5,  theta = arg z = atan(4/3)  (about 0.927295218)
+  theta is the principal argument, -pi < theta <= pi
+  check: equal numerically (3 + 4i, complex arithmetic)
+  check: equal numerically (3 + 4i, complex arithmetic)
+> convert 2 cis(pi/3) to rectangular form
+  ucas: complex 2 cis(pi/3)
+2 cis(pi/3) = 1 + i*sqrt(3)
+  Re = 1,  Im = sqrt(3)
+  check: equal numerically (1 + 1.732050808i, complex arithmetic)
+> the 5th roots of unity
+  ucas: unity 5
+the 5 fifth roots of 1 (w^5 = 1)
+  w0 = 1                      = 1  (principal)
+  w1 = (-1 + sqrt(5))/4 + i*sqrt((5 + sqrt(5))/8) = e^(i*2pi/5)
+  w2 = -(1 + sqrt(5))/4 + i*sqrt((5 - sqrt(5))/8) = e^(i*4pi/5)
+  w3 = -(1 + sqrt(5))/4 - i*sqrt((5 - sqrt(5))/8) = e^(-i*4pi/5)
+  w4 = (-1 + sqrt(5))/4 - i*sqrt((5 + sqrt(5))/8) = e^(-i*2pi/5)
+  check: each w^5, parsed back as printed, equals 1 numerically
+> solve z^4 = -16
+  ucas: nthroots 4 -16
+the 4 fourth roots of -16 (w^4 = -16)
+  w0 = sqrt(2) + i*sqrt(2)    = 2*e^(i*pi/4)  (principal)
+  w1 = -sqrt(2) + i*sqrt(2)   = 2*e^(i*3pi/4)
+  w2 = -sqrt(2) - i*sqrt(2)   = 2*e^(-i*3pi/4)
+  w3 = sqrt(2) - i*sqrt(2)    = 2*e^(-i*pi/4)
+  check: each w^4, parsed back as printed, equals -16 numerically
+> rewrite sin^2 x using double angle
+  ucas: trig sin^2 x double
+  note: x is taken as real
+trig forms of sin^2 x
+  power reduction: sin^2 u = (1 - cos 2u)/2, cos^2 u = (1 + cos 2u)/2 (higher powers through e^(iu) = cos u + i sin u)
+    = (1 - cos(2x))/2
+    check: equal at 64 of 64 sample points (max relative difference 1e-16)
+  simplest: sin^2 x  (as given)
+> express tan x in terms of sin and cos
+  ucas: trig tan x sincos
+  note: x is taken as real
+trig forms of tan x
+  in sin and cos: tan = sin/cos, sec = 1/cos, csc = 1/sin, cot = cos/sin, tanh = sinh/cosh
+    = sin(x)/cos(x)
+    check: equal at 64 of 64 sample points (max relative difference 2e-16)
+  simplest: tan x  (as given)
+> simplify sin x cos x
+  ucas: trig sin x cos x
+  note: x is taken as real
+trig forms of sin x cos x
+  product to sum: sin a cos b = (sin(a + b) + sin(a - b))/2, cos a cos b = (cos(a - b) + cos(a + b))/2, sin a sin b = (cos(a - b) - cos(a + b))/2
+    = sin(2x)/2
+    check: equal at 64 of 64 sample points (max relative difference 6e-17)
+  exponential (Euler): sin u = (e^(iu) - e^(-iu))/(2i), cos u = (e^(iu) + e^(-iu))/2
+    = (exp(i*x) - exp(-i*x))*(exp(i*x) + exp(-i*x))/(4*i)
+    check: equal at 64 of 64 sample points
+  simplest: sin(2x)/2  (product to sum)
+> product to sum of sin x cos y
+  ucas: trig sin x cos y product
+  note: x, y are taken as real
+trig forms of sin x cos y
+  product to sum: sin a cos b = (sin(a + b) + sin(a - b))/2, cos a cos b = (cos(a - b) + cos(a + b))/2, sin a sin b = (cos(a - b) - cos(a + b))/2
+    = (sin(x + y) + sin(x - y))/2
+    check: equal at 64 of 64 sample points (max relative difference 1e-16)
+  simplest: sin x cos y  (as given)
+> write 3 sin x + 4 cos x in the form R sin(x + phi)
+  ucas: trig 3 sin x + 4 cos x harmonic
+  note: x is taken as real
+trig forms of 3 sin x + 4 cos x
+  amplitude-phase: a sin u + b cos u = R sin(u + phi), R = sqrt(a^2 + b^2), phi = atan2(b, a)
+    = 5sin(x + atan(4/3))
+    check: equal at 64 of 64 sample points (max relative difference 8e-16)
+  amplitude-phase: a sin u + b cos u = R cos(u - psi), psi = atan2(a, b)
+    = 5cos(x - atan(3/4))
+    check: equal at 64 of 64 sample points (max relative difference 1e-15)
+  simplest: 3 sin x + 4 cos x  (as given)
+> the laplace transform of t^2 e^-t
+  ucas: laplace t^2 e^-t
+L{t^2*e^(-t)}(s) = 2/(s + 1)^3
+  region of convergence: Re(s) > -1
+  one-sided: f(t) for t >= 0 (0 before)
+  rules: e^(at) f(t) -> F(s - a), t^n f(t) -> (-1)^n F^(n)(s)
+  check: matches int_0^inf f(t) e^(-st) dt (Gauss-Kronrod) at s = -1/2, 1/2, 3: max relative difference 4.4e-16
+> inverse laplace of 1/(s^2+1)
+  ucas: ilaplace 1/(s^2+1)
+L^-1{1/(s^2 + 1)}(t) = sin(t)
+  poles: s = +-i
+  for t >= 0 (0 before): the right-sided inverse, region of convergence Re(s) > 0 (right of every pole)
+  check: transformed back (Gauss-Kronrod), it matches F at s = 1, 2, 7/2: max relative difference 1.8e-16
+> the z transform of a^n u[n]
+  ucas: ztrans a^n u[n]
+Z{a^n*u[n]}(z) = z/(z - a)
+  region of convergence: |z| > abs(a)
+  one-sided: x[n] for n >= 0
+  rules: a^n x[n] -> X(z/a)
+  check: matches sum_n x[n] z^-n (88 terms) at z = 17/10, 17/5, 71/10 with a = 7/10: max relative difference 2e-16
+> the fourier series of a square wave on -1 to 1
+  ucas: fourier series sign(x) on -1 to 1
+Fourier series of sign(x) on [-1, 1] (period 2):
+  f(x) ~ a0/2 + sum_{n>=1} a_n cos(pi*n*x) + b_n sin(pi*n*x)
+  a_n = int f(x) cos(pi*n*x) dx over the period, b_n likewise with sin
+  a0 = 0
+  a_n = 0 (f is odd)
+  b_n = 2(1 - (-1)^n)/(pi*n)
+  check: the closed forms equal the numeric coefficients (Gauss-Legendre, 5120 nodes) for n = 1..48
+  f(x) ~ 4sin(pi*x)/pi + 4sin(3pi*x)/(3pi) + 4sin(5pi*x)/(5pi) + 4sin(7pi*x)/(7pi) + 4sin(9pi*x)/(9pi) + ...
+  partial sums S_N: ||f - S_N||/||f|| = 0.259 (N = 5), 0.0919 (N = 48)
+  converges to f where f is continuous, and to the midpoint of the jump where it jumps:
+    at x = 0 it jumps by 2: S_N -> 0
+    at x = 1 it jumps by -2: S_N -> the midpoint
+  Gibbs: near x = 0, S_48 overshoots by 0.1791 = 9.0% of the jump (at x = 0.02083); the overshoot tends to 8.95% of the jump and does not shrink as N grows
+> fourier transform of e^(-x^2)
+  ucas: fourier e^(-x^2)
+F{e^(-x^2)}(w) = sqrt(pi)*e^(-w^2/4)
+  convention: F(w) = int f(x) e^(-iwx) dx over the real line (angular frequency; the inverse has 1/(2pi))
+  check: matches the integral computed numerically at w = 1/2, 13/10, 27/10: max relative difference 6.7e-16
+> the dft of [1, 2, 3, 4]
+  ucas: dft [1, 2, 3, 4]
+DFT of 4 values (X[k] = sum_n x[n] e^(-2 pi i k n/N); radix-2 FFT, N log2 N operations)
+  k    X[k]                         |.|            arg
+  0    10                           10             0
+  1    -2 + 2i                      2sqrt(2)       3pi/4
+  2    -2                           2              pi
+  3    -2 - 2i                      2sqrt(2)       -3pi/4
+  check: the inverse transform gives the input back (max difference 0); Parseval: sum |x|^2 = 30, sum |X|^2/N = 30
+  bin k is the frequency k/N cycles per sample; k > N/2 are the negative frequencies k - N
+> does the sum of 1/n^2 converge?
+  ucas: converge 1/n^2
+sum(n, 1, inf, 1/n^2)
+  converges absolutely: p-series 1/n^2 with p = 2 > 1
+  partial sums: S_10 = 1.549767731, S_1000 = 1.643934567
+> what is the sum of 1/n^2 from 1 to infinity?
+  ucas: sum(n, 1, inf, 1/n^2)
+sum(n, 1, inf, 1/n^2)
+  converges absolutely: p-series 1/n^2 with p = 2 > 1
+  = pi^2/6
+  method: partial fractions; zeta(k), digamma at integers
+  numeric: 1.644934066848226 (the first 128 terms plus an Euler-Maclaurin tail (integral + 3 corrections); estimated error 4.4e-16)
+  check: the closed form and the numeric value agree (difference 4.4e-16)
+> radius of convergence of the sum of x^n/n!
+  ucas: radius x^n/n!
+power series sum(n, 0, inf, x^n/n!) in x
+  center x = 0; coefficients a_n = 1/n! of x^(n)
+  radius of convergence R = inf (ratio test: |a_(n+1)/a_n| -> 0)
+  interval of convergence: every x (absolutely)
+  sum = e^x    for |x| < inf (e^u)
+> the generating function of fibonacci
+  ucas: genfunc fibonacci
+fibonacci: a[n+2] = a[n+1] + a[n], a[0] = 0, a[1] = 1
+  a[n] = sqrt(5)*((1 + sqrt(5))/2)^n/5 - sqrt(5)*((1 - sqrt(5))/2)^n/5
+  G(x) = sum_{n>=0} a_n x^n = x/(1 - x - x^2)    for |x| < (-1 + sqrt(5))/2
+  check: sum_n a_n x^n at x = (-1 + sqrt(5))/4 is 0.518927630227216, G = 0.518927630227215 (difference 1.1e-16)
+> the closed form of the sum of i squared for i from 1 to n
+  ucas: it(n: int in 0..100) = sum(i, 1, n, i^2)
+  ucas: closed it
+sum(i, 1, n, i^2)
+  = n*(n + 1)*(2n + 1)/6
+  method: Faulhaber (polynomial in the index)
+  check: equals direct iteration at all 101 points of the domain
+> the sum over k from 1 to 10 of k cubed
+  ucas: sum(k, 1, 10, k^3)
+3025
+> what is the product of i for i from 1 to 6?
+  ucas: prod(i, 1, 6, i)
+720
+> y' = -2y + 1
+> y(0) = 3
+> solve y from 0 to 2 in 2 steps
+  ucas: dsolve y from 0 to 2 steps 2
+y' = -2y + 1, y(0) = 3
+  linear with constant coefficients: eigenvalues -2; forcing by undetermined coefficients
+  y(t) = 2.5exp(-2*t) + 0.5
+  check: satisfies the equations at 201 points of [0, 2] (max relative residual 7.4e-17) and the initial values
+  numeric (Dormand-Prince 5(4), adaptive, 90 steps) agrees with it to 2.3e-11
+      t            y(t)
+      0            3
+      1            0.8383382081
+      2            0.5457890972

@@ -1,0 +1,306 @@
+> what is the range of x for a byte x?
+  note: "byte" without signed or unsigned: read as unsigned, u8, not signed, i8 (say "unsigned byte", or "assume bytes are signed")
+  ucas: it(x: u8) = x
+  ucas: range it
+range of it -> u8:
+  0..255   (256 distinct values)
+  fits in u8
+  over all 256 points of the domain
+> what is the range of x for a char x?
+  note: "char" without signed or unsigned: read as signed, i8 (as on x86), not unsigned, u8 (as on ARM) (say "signed char", or "assume chars are unsigned")
+  ucas: it(x: i8) = x
+  ucas: range it
+range of it -> i8:
+  -128..127   (256 distinct values)
+  fits in i8
+  over all 256 points of the domain
+> does x plus 1 overflow for an int x?
+  note: "int": read as a C int, i32, not an unbounded integer, int (say "32-bit int" or "unbounded integer", or "assume int means unbounded")
+  ucas: it(x: i32) = x + 1
+  ucas: wrap it
+wrap analysis of it:
+  x + 1   (i32)
+      nuw fails: unsigned wrap at 1 points, e.g. x=-1
+      nsw fails: signed wrap at 1 points, e.g. x=2147483647  <- UB in C; a compiler assumes it cannot happen
+  end to end: differs from the mathematical result at 1 points, e.g. x=2147483647
+  sampled 65536 points (domain has 4294967296 points); not exhaustive
+> what is the range of n for an integer n?
+  note: "integer" without a width: read as an unbounded integer, int, not a C int, i32 (say "32-bit integer", or "assume integers are 32-bit")
+  ucas: it(n: int) = n
+  ucas: range it
+range of it -> int:
+  -9223372036854775808..9223372036854775807
+  fits in i64
+  sampled 65536 points (domain has 2^64 or more points); not exhaustive
+  sound bound (intervals): -9223372036854775808..9223372036854775807
+  proved bound (monotonicity, exact algebra): -9.2233720368547758e+18..9.2233720368547758e+18
+  the sample reaches both ends: the range is exactly -9.2233720368547758e+18..9.2233720368547758e+18 (proved)
+    max: it is nondecreasing in n, so take n = 9223372036854775807:
+      9223372036854775807
+    min: it is nondecreasing in n, so take n = -9223372036854775808:
+      -9223372036854775808
+> what is the range of x for a word x?
+  note: "word": read as 32 bits (ARM word), not 16 bits (x86 WORD) or 64 bits (machine word) (say "16-bit", "32-bit" or "64-bit", or "assume words are 64-bit")
+  ucas: it(x: u32) = x
+  ucas: range it
+range of it -> u32:
+  0..4294967295
+  fits in u32
+  sampled 65536 points (domain has 4294967296 points); not exhaustive
+  sound bound (intervals): 0..4294967295
+  proved bound (monotonicity, exact algebra): 0..4294967295
+  the sample reaches both ends: the range is exactly 0..4294967295 (proved)
+    max: it is nondecreasing in x, so take x = 4294967295:
+      4294967295
+    min: it is nondecreasing in x, so take x = 0:
+      0
+> what is the range of x for a 12-bit x?
+  note: "12-bit" without signed or unsigned: read as unsigned, u12, not signed, i12 (say "unsigned" or "signed", or "assume N-bit numbers are signed")
+  ucas: it(x: u12) = x
+  ucas: range it
+range of it -> u12:
+  0..4095   (4096 distinct values)
+  fits in u12
+  over all 4096 points of the domain
+> what is the range of x for a signed 12-bit x?
+  ucas: it(x: i12) = x
+  ucas: range it
+range of it -> i12:
+  -2048..2047   (4096 distinct values)
+  fits in i12
+  over all 4096 points of the domain
+> what is the range of x for a 12-bit unsigned x?
+  ucas: it(x: u12) = x
+  ucas: range it
+range of it -> u12:
+  0..4095   (4096 distinct values)
+  fits in u12
+  over all 4096 points of the domain
+> what is the log of 100?
+  note: "log" without a base: read as the natural log, ln, not log base 2 or log base 10 (say "natural log", "log base 2" or "log base 10", or "assume log means base 2")
+  ucas: log(100)
+4.60517
+> what is the square root of 17?
+  note: the square root of a constant: read as the real one, sqrt(17), not the floor root, isqrt (say "integer square root", or "assume square root means integer")
+  ucas: sqrt(17)
+4.12311
+> what is 6 and 3?
+  note: "and"/"or" between numbers: read as bitwise (& and |), not logical (&& and ||) (say "bitwise and" or "logical and")
+  ucas: 6 & 3
+2
+> what is 6 or 3?
+  ucas: 6 | 3
+7
+> what is the bitwise not of 5?
+  note: the bitwise not of a constant: taken in 32 bits (i32)
+  ucas: ~i32(5)
+-6
+> what is the logical not of 0?
+  ucas: !0
+1
+> what is the square root of x plus 1?
+  note: what does "the square root of" apply to: read as sqrt(x) + ..., not sqrt(x + ...) (say "the square root of the quantity ..." for the second)
+  ucas: it(x) = sqrt(x) + 1
+  ucas: show it
+it(x: real) = sqrt(x) + 1
+  -> real
+> what is the sine of x plus 1?
+  note: what does "the sine of" apply to: read as sin(x) + ..., not sin(x + ...) (say "the sine of the quantity ..." for the second)
+  ucas: it(x) = sin(x) + 1
+  ucas: show it
+it(x: real) = sin(x) + 1
+  -> real
+> cos of pi/2 to -pi/2 w/o crit. points
+  note: read the interval as [-pi/2, pi/2]
+  ucas: it(x in -pi/2..pi/2) = cos(x)
+  ucas: range it nocrit
+range of it:
+  [6.123233996e-17, 1]   min at x ≈ -1.570796327, max at x ≈ 0
+  grid of 20001 points over [-1.5708, 1.5708], critical points not used (nocrit)
+> cos of -pi/2 to pi/2 with crit. points
+  ucas: it(x in -pi/2..pi/2) = cos(x)
+  ucas: range it
+range of it:
+  [6.123233996e-17, 1]   min at x ≈ -1.570796327, max at x ≈ 0
+  grid of 20001 points over [-1.5708, 1.5708], extrema refined at critical points
+> the sum of x and y squared
+  note: what does "squared/power" apply to: read as ... + y^2, not (... + y)^2 (say "the square of the sum of ..." for the second)
+  ucas: it(x, y) = x + y^2
+  ucas: show it
+it(x: real, y: real) = x + y^2
+  -> real
+> what is the square root of the quantity x plus 1?
+  ucas: it(x) = sqrt(x + 1)
+  ucas: show it
+it(x: real) = sqrt(x + 1)
+  -> real
+> range of x for x from 3 to 1
+  ucas: it(x in 1..3) = x
+  ucas: range it
+range of it -> int:
+  1..3
+  fits in u2
+  over all 3 points of the domain
+> is x equal to y for u8 x, y and z?
+  note: z is declared but not used here
+  ucas: it(x: u8, y: u8) = x
+  ucas: that(x: u8, y: u8) = y
+  ucas: equiv it that
+it and that differ at 65280 points, e.g. x=1, y=0: 1 vs 0
+> are (x + y)^2 and x^2 + 2xy + y^2 equivalent for u8 x and y?
+  note: read "xy" as x*y (both are variables here; name it to use it whole)
+  ucas: it(x: u8, y: u8) = (x + y)^2
+  ucas: that(x: u8, y: u8) = x^2 + 2*(x*y) + y^2
+  ucas: equiv it that
+it and that are equal on the domain of it (exhaustive)
+> avg(a: u8, b: u8) = (a + b) / 2
+> is avg comutative?
+  note: read "comutative" as "commutative"
+  note: commutative: avg(a, b) = avg(b, a) everywhere?
+  ucas: lhs(a: u8, b: u8) = avg(a, b)
+  ucas: rhs(a: u8, b: u8) = avg(b, a)
+  ucas: equiv lhs rhs
+lhs and rhs are equal on the domain of lhs (exhaustive)
+> what is the integal of x squared?
+  note: read "integal" as "integral"
+  ucas: it(x) = x^2
+  ucas: integrate it
+∫ x^2 dx
+  = x^3/3 + C
+  check: d/dx of it equals the integrand at 401 points of [-10, 10] (max difference 1.4e-14)
+> what is the derivate of x cubed wrt x?
+  ucas: it(x) = x^3
+  ucas: diff it x
+d/dx it = 3x^2
+  holds for every real x
+  check: matches central differences at 201 points (max relative difference 2e-15)
+> what is 2 to the 10th?
+  ucas: 2^10
+1024
+> assume log means base 2
+  ok: log means base 2
+> what is the log of 8?
+  ucas: log(8)/log(2)
+3
+> assume the log means base 10
+  ok: the log means base 10
+> what is the log of 8?
+  ucas: log(8)/log(10)
+0.90309
+> forget log
+  ok: forgot log
+> what is the log of 8?
+  note: "log" without a base: read as the natural log, ln, not log base 2 or log base 10 (say "natural log", "log base 2" or "log base 10", or "assume log means base 2")
+  ucas: log(8)
+2.07944
+> forget log
+  ok: forgot log
+> assume bytes are signed
+  ok: bytes are signed
+> what is the range of x for a byte x?
+  ucas: it(x: i8) = x
+  ucas: range it
+range of it -> i8:
+  -128..127   (256 distinct values)
+  fits in i8
+  over all 256 points of the domain
+> forget bytes
+  ok: forgot bytes
+> what is the range of x for a byte x?
+  note: "byte" without signed or unsigned: read as unsigned, u8, not signed, i8 (say "unsigned byte", or "assume bytes are signed")
+  ucas: it(x: u8) = x
+  ucas: range it
+range of it -> u8:
+  0..255   (256 distinct values)
+  fits in u8
+  over all 256 points of the domain
+> assume a byte is unsigned
+  ok: a byte is unsigned
+> what is the range of x for a byte x?
+  ucas: it(x: u8) = x
+  ucas: range it
+range of it -> u8:
+  0..255   (256 distinct values)
+  fits in u8
+  over all 256 points of the domain
+> assume square root means integer
+  ok: square root means integer
+> what is the square root of 17?
+  ucas: isqrt(17)
+4
+> forget square root
+  ok: forgot square root
+> what is the square root of 17?
+  note: the square root of a constant: read as the real one, sqrt(17), not the floor root, isqrt (say "integer square root", or "assume square root means integer")
+  ucas: sqrt(17)
+4.12311
+> assume and means logical
+  ok: and means logical
+> what is 6 and 3?
+  ucas: 6 && 3
+1
+> assume and means bitwise
+  ok: and means bitwise
+> what is 6 and 3?
+  ucas: 6 & 3
+2
+> assume int means i32
+  ok: int means i32
+> does x plus 1 overflow for an int x?
+  ucas: it(x: i32) = x + 1
+  ucas: wrap it
+wrap analysis of it:
+  x + 1   (i32)
+      nuw fails: unsigned wrap at 1 points, e.g. x=-1
+      nsw fails: signed wrap at 1 points, e.g. x=2147483647  <- UB in C; a compiler assumes it cannot happen
+  end to end: differs from the mathematical result at 1 points, e.g. x=2147483647
+  sampled 65536 points (domain has 4294967296 points); not exhaustive
+> assume int means unbounded
+  ok: int means unbounded
+> does x plus 1 overflow for an int x?
+  ucas: it(x: int) = x + 1
+  ucas: wrap it
+wrap analysis of it:
+  no wrapping or rounding operations
+  end to end: equals the mathematical (unbounded) result everywhere
+  sampled 65536 points (domain has 2^64 or more points); not exhaustive
+> forget everything
+  ok: forgot every assumption
+> what is the log of 8?
+  note: "log" without a base: read as the natural log, ln, not log base 2 or log base 10 (say "natural log", "log base 2" or "log base 10", or "assume log means base 2")
+  ucas: log(8)
+2.07944
+> p is a byte
+  note: "byte" without signed or unsigned: read as unsigned, u8, not signed, i8 (say "unsigned byte", or "assume bytes are signed")
+  ok: from now on p is a byte
+> what is the range of p?
+  ucas: it(p: u8) = p
+  ucas: range it
+range of it -> u8:
+  0..255   (256 distinct values)
+  fits in u8
+  over all 256 points of the domain
+> what is the range of p plus 1?
+  ucas: it(p: u8) = p + 1
+  ucas: range it
+range of it -> u8:
+  0..255   (256 distinct values)
+  fits in u8
+  over all 256 points of the domain
+> assume q is an unsigned 8-bit value
+  ok: from now on q is an unsigned 8-bit value
+> what is the range of q?
+  ucas: it(q: u8) = q
+  ucas: range it
+range of it -> u8:
+  0..255   (256 distinct values)
+  fits in u8
+  over all 256 points of the domain
+> forget q
+  ok: forgot q
+> what is the range of q?
+  ucas: it(q) = q
+  ucas: range it
+range of it:
+  [-10, 10]   min at q ≈ -10, max at q ≈ 10
+  grid of 20001 points over [-10, 10] (default; give x a range), extrema refined at critical points

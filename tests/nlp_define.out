@@ -1,0 +1,219 @@
+> let f of x be x squared plus 1 where x is between 0 and 10
+  ucas: f(x in 0..10) = x^2 + 1
+  ucas: show f
+f(x: int in 0..10) = x^2 + 1
+  -> int
+> what is its range?
+  ucas: range f
+range of f -> int:
+  1..101
+  fits in u7
+  over all 11 points of the domain
+> what is f when x is 3?
+  ucas: f(3)
+10
+> what is f of 2?
+  ucas: f(2)
+5
+> f of 5
+  ucas: f(5)
+26
+> let g of x be 2 x plus 1
+  ucas: g(x) = 2*x + 1
+  ucas: show g
+g(x: real) = 2x + 1
+  -> real
+> call it twice_one
+  ucas: twice_one(x: real) = g(x)
+  ucas: show twice_one
+twice_one(x: real) = 2x + 1
+  -> real
+> what is twice_one of 4?
+  ucas: twice_one(4)
+9
+> what is g of 4?
+  ucas: g(4)
+9
+> let h of p and q be p times q plus 1
+  ucas: h(p, q) = p*q + 1
+  ucas: show h
+h(p: real, q: real) = p*q + 1
+  -> real
+> what is h of 2 and 3?
+  ucas: h(2, 3)
+7
+> define k of x as x cubed
+  ucas: k(x) = x^3
+  ucas: show k
+k(x: real) = x^3
+  -> real
+> what is k of 3?
+  ucas: k(3)
+27
+> f(x) = x^2 + 2x + 1
+> what is the range of f for x from 0 to 3?
+  ucas: it(x: real in 0..3) = f(x)
+  ucas: range it
+range of it:
+  [1, 16]   min at x ≈ 0, max at x ≈ 3
+  grid of 20001 points over [0, 3], extrema refined at critical points
+> what are the roots of f?
+  ucas: zeros f
+zeros of f:
+  1 zero:
+    x = -1 (multiplicity 2)
+  proved: a polynomial of degree 2 has 2 roots counted with multiplicity
+> g of x is 3x minus 1
+  ucas: g(x) = 3*x - 1
+  ucas: show g
+g(x: real) = 3x - 1
+  -> real
+> what is g of 2?
+  ucas: g(2)
+5
+> let p of x be x cubed minus 3x
+  ucas: p(x) = x^3 - 3*x
+  ucas: show p
+p(x: real) = x^3 - 3x
+  -> real
+> what are the critical points of p?
+  ucas: crit p
+critical points of p:
+  p' = 3x^2 - 3
+  x ≈ -1: local maximum, p = 2
+  x ≈ 1: local minimum, p = -2
+  searched [-10, 10] (default; give x a range)
+> what is the derivative of p?
+  ucas: diff p
+d/dx p = 3x^2 - 3
+  holds for every real x
+  check: matches central differences at 201 points (max relative difference 2e-15)
+> what is the second derivative of p?
+  ucas: diff p 2
+d/dx p = 3x^2 - 3
+d²/dx² p = 6x
+  holds for every real x
+  check: each order matches central differences at 402 points (max relative difference 2e-15)
+> let y be 5
+  ucas: y = 5
+  ucas: show y
+y() = 5
+  -> int
+> what is y plus 1?
+  ucas: y + 1
+6
+> x if x is positive, otherwise minus x; call it myabs
+  ucas: it(x) = x > 0 ? x : -x
+  ucas: show it
+it(x: real) = x > 0 ? x : -x
+  -> real
+  ucas: myabs(x: real) = it(x)
+  ucas: show myabs
+myabs(x: real) = x > 0 ? x : -x
+  -> real
+> what is the derivative of myabs?
+  ucas: diff myabs
+d/dx myabs = x > 0 ? 1 : -1
+  holds for x != 0
+    at x = 0 myabs has a corner (slope -1 from the left, 1 from the right)
+    (points looked for in [-10, 10])
+  check: matches central differences at 201 points (max relative difference 1e-15)
+> what is myabs of -3?
+  ucas: myabs(-3)
+3
+> what is the range of myabs for x from -4 to 4?
+  ucas: it(x: real in -4..4) = myabs(x)
+  ucas: range it
+range of it:
+  [-0, 4]   min at x ≈ 0, max at x ≈ -4
+  grid of 20001 points over [-4, 4], extrema refined at critical points
+> x is a byte
+  note: "byte" without signed or unsigned: read as unsigned, u8, not signed, i8 (say "unsigned byte", or "assume bytes are signed")
+  ok: from now on x is a byte
+> what is the range of x plus 1?
+  ucas: it(x: u8) = x + 1
+  ucas: range it
+range of it -> u8:
+  0..255   (256 distinct values)
+  fits in u8
+  over all 256 points of the domain
+> assume q is a signed byte
+  ok: from now on q is a signed byte
+> what is the range of q?
+  ucas: it(q: i8) = q
+  ucas: range it
+range of it -> i8:
+  -128..127   (256 distinct values)
+  fits in i8
+  over all 256 points of the domain
+> what is the range of x plus 1 for an unsigned byte x?
+  ucas: it(x: u8) = x + 1
+  ucas: range it
+range of it -> u8:
+  0..255   (256 distinct values)
+  fits in u8
+  over all 256 points of the domain
+> what is the range of n for an integer n between 1 and 12?
+  note: "integer" without a width: read as an unbounded integer, int, not a C int, i32 (say "32-bit integer", or "assume integers are 32-bit")
+  ucas: it(n: int in 1..12) = n
+  ucas: range it
+range of it -> int:
+  1..12
+  fits in u4
+  over all 12 points of the domain
+> what is the range of 2 to the n for n between 0 and 10?
+  ucas: it(n in 0..10) = 2^n
+  ucas: range it
+range of it -> int:
+  1..1024
+  fits in u11
+  over all 11 points of the domain
+> does x times x overflow for a 16-bit unsigned x?
+  ucas: it(x: u16) = x*x
+  ucas: wrap it
+wrap analysis of it:
+  x*x   (u16)
+      nuw fails: unsigned wrap at 65280 points, e.g. x=256
+      nsw fails: signed wrap at 65173 points, e.g. x=182
+  end to end: differs from the mathematical result at 65280 points, e.g. x=256
+      exact for: 0..255
+  over all 65536 points of the domain
+> what is the range of x divided by 2 for a 32-bit signed x?
+  ucas: it(x: i32) = x/2
+  ucas: range it
+range of it -> i32:
+  -1073741824..1073741823
+  fits in i31
+  sampled 65536 points (domain has 4294967296 points); not exhaustive
+  sound bound (intervals): -2147483648..2147483647
+> avg(a: u8, b: u8) = (a + b) / 2
+> does avg overflow?
+  ucas: wrap avg
+wrap analysis of avg:
+  a + b   (u8)
+      nuw fails: unsigned wrap at 32640 points, e.g. a=255, b=1
+      nsw fails: signed wrap at 16384 points, e.g. a=127, b=1
+  end to end: differs from the mathematical result at 32640 points, e.g. a=255, b=1
+  over all 65536 points of the domain
+> is avg equal to (a & b) + ((a xor b) >> 1)?
+  ucas: that(a: u8, b: u8) = (a & b) + ((a xor b) >> 1)
+  ucas: equiv avg that
+avg and that differ at 32640 points, e.g. a=255, b=1: 0 vs 128
+> is avg commutative?
+  note: commutative: avg(a, b) = avg(b, a) everywhere?
+  ucas: lhs(a: u8, b: u8) = avg(a, b)
+  ucas: rhs(a: u8, b: u8) = avg(b, a)
+  ucas: equiv lhs rhs
+lhs and rhs are equal on the domain of lhs (exhaustive)
+> is 2 to the 10th bigger than 10 squared?
+  ucas: 2^10 > 10^2
+1
+> what is x squared at x = 3?
+  ucas: 3^2
+9
+> what is sin x at x = pi/6?
+  ucas: sin((pi/6))
+0.5
+> what is f of g of 2?
+  ucas: f(g(2))
+36

@@ -1,0 +1,77 @@
+# Elicitation: what an unclear word is read as (a note when there is no
+# terminal), and the session meanings that answer it for good
+# ("assume ..."), including forgetting them again.
+
+# 1. types: byte, char, int, integer, word, N-bit
+what is the range of x for a byte x?
+what is the range of x for a char x?
+does x plus 1 overflow for an int x?
+what is the range of n for an integer n?
+what is the range of x for a word x?
+what is the range of x for a 12-bit x?
+what is the range of x for a signed 12-bit x?
+what is the range of x for a 12-bit unsigned x?
+
+# 2. log, square root, and/or/not between numbers
+what is the log of 100?
+what is the square root of 17?
+what is 6 and 3?
+what is 6 or 3?
+what is the bitwise not of 5?
+what is the logical not of 0?
+
+# 3. scope: what "of" applies to
+what is the square root of x plus 1?
+what is the sine of x plus 1?
+cos of pi/2 to -pi/2 w/o crit. points
+cos of -pi/2 to pi/2 with crit. points
+the sum of x and y squared
+what is the square root of the quantity x plus 1?
+
+# 4. notes that say what was done with the sentence
+range of x for x from 3 to 1
+is x equal to y for u8 x, y and z?
+are (x + y)^2 and x^2 + 2xy + y^2 equivalent for u8 x and y?
+avg(a: u8, b: u8) = (a + b) / 2
+is avg comutative?
+what is the integal of x squared?
+what is the derivate of x cubed wrt x?
+what is 2 to the 10th?
+
+# 5. a meaning for the session, and forgetting it
+assume log means base 2
+what is the log of 8?
+assume the log means base 10
+what is the log of 8?
+forget log
+what is the log of 8?
+forget log
+assume bytes are signed
+what is the range of x for a byte x?
+forget bytes
+what is the range of x for a byte x?
+assume a byte is unsigned
+what is the range of x for a byte x?
+assume square root means integer
+what is the square root of 17?
+forget square root
+what is the square root of 17?
+assume and means logical
+what is 6 and 3?
+assume and means bitwise
+what is 6 and 3?
+assume int means i32
+does x plus 1 overflow for an int x?
+assume int means unbounded
+does x plus 1 overflow for an int x?
+forget everything
+what is the log of 8?
+
+# 6. variables declared for the session
+p is a byte
+what is the range of p?
+what is the range of p plus 1?
+assume q is an unsigned 8-bit value
+what is the range of q?
+forget q
+what is the range of q?
