@@ -85,7 +85,7 @@ fp64 and conversions under gt1030:
   note: the ```glsl block was compiled to SPIR-V with glslangValidator
   optimized with spirv-opt -O (what follows is beyond that)
 > use nosuchmodel
-firstmodel.ucas:15:5: error: unknown model 'nosuchmodel' (the models: gt1030, sm75, sm86, rdna2, skl, skx, glc, rpl, zen4, x86v2, x86v3, x86v4)
+firstmodel.ucas:15:5: error: unknown model 'nosuchmodel' (the models: gt1030, sm75, sm86, rdna2, mali_g715, skl, skx, glc, rpl, zen4, x86v2, x86v3, x86v4)
     use nosuchmodel
         ^
   note: the ```glsl block was compiled to SPIR-V with glslangValidator
