@@ -1427,8 +1427,16 @@ behind it.  English only; the translator is a hand-written parser
 - **Expressions**: `x squared plus one`, `the sum of a, b and c`, `half
   of x`, `20 percent of y`, `the number of set bits in x`, `x shifted
   left by 3`, `e to the power of 2`, mixed freely with ucas notation.
-  Number words, `90deg`, `90 degrees`, `90°` (angles, converted to
-  radians), `1.5r`/`rad`.  Primes after a name are ucas notation and
+  Number words (`two hundred fifty-six`, `1 million`, `2.5 billion`),
+  mixed numbers (`1 and a half times 8` is 12), `7/8 of 64`, `7
+  factorial` and `7!` (exactly, up to 20; past that it says `bigint
+  25!`), `the fourth power of 3`, `the 4th root of 16`, `3.5 rounded`
+  (or `rounded up`, `rounded down`, `to the nearest integer`), `90deg`,
+  `90 degrees`, `90°` (angles, converted to radians), `in degrees` and
+  `in radians` (`pi/2 in degrees`), `1.5r`/`rad`.  A number next to a
+  name multiplies, spaced or not: `2x`, `2 pi`, `3 x squared`; `2xy`
+  with `x` and `y` both in the sentence is `2*x*y` and says so.
+  Primes after a name are ucas notation and
   pass through: `what is f'(3)`, `f''`, `the slope field of y' = t -
   y`, `solve y' = -2y + 1 with y(0) = 3` (defines the ODE and its
   initial values, then `dsolve`; also systems, `x' = y and y' = -x`);
@@ -1449,17 +1457,26 @@ behind it.  English only; the translator is a hand-written parser
   `the shuffle of x from lane 3`, `the broadcast of x from lane 7`, `the
   xor shuffle of x with 1`, `the lane rotation of x by 2`.
 - **Variables**: `for a signed byte x`, `where x is between 1 and 12`,
-  `x and y are unsigned bytes`, `when x is 3` (substituted), `on [a, b]`
-  or `from a to b` for the only variable, `cos of a to b` (an implicit
-  x); a reversed interval is put in order.
+  `where x is a 4-bit unsigned x`, `x and y are unsigned bytes`, `when
+  x is 3` or `at x = 3` (substituted), `on [a, b]` or `from a to b` for
+  the only variable, `cos of a to b` (an implicit x); a reversed
+  interval is put in order.
 - **Ambiguity**: `byte` (u8/i8), `char`, `int` (i32 or unbounded),
   `integer`, `word` (16/32/64), N-bit without a sign, `log` (ln, log2,
   log10), `the square root` of an integer (isqrt or real), `and`/`or`/
   `not` between numbers, and scope (`the square root of x plus 1`, `the
-  sum of x and y squared`).  On a terminal ucas asks; term meanings are
-  kept for the session (`assume log means base 2` sets one).  Otherwise
-  the default is taken and a `note:` says which and how to say the
-  other.  `-i` always asks, `-y` never does.
+  sum of x and y squared`; a constant over a number is not asked about:
+  `the sine of pi/2` is `sin(pi/2)`), the square root of a constant
+  (`sqrt(17)`, with `assume square root means integer` for `isqrt`), the
+  width of `the bitwise not` of a constant (32 bits), a two-letter name
+  that reads as two variables in play (`2xy`), and a variable the
+  sentence declares and never uses.  On a terminal ucas asks; term
+  meanings are kept for the session (`assume log means base 2` sets one,
+  `assume a byte is unsigned`, `forget log` clears one again, `forget
+  everything` clears them all).  Otherwise the default is taken and a
+  `note:` says which and how to say the other.  `-i` always asks, `-y`
+  never does; with no terminal the notes are the answers (see
+  `nlp_defer.ucas` for the deferred-question protocol the bot uses).
 - **Follow-up questions**: approx without an interval asks for one; the
   reply is read as the rest of the sentence, so options compound:
   `cheby poly nocrit`, `0 to pi/4 degree 4 crit`.  An empty reply takes

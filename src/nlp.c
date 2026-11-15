@@ -210,6 +210,37 @@ pref_set(const char *k, int v)
 	}
 }
 
+/*
+ * "forget log": a meaning kept for the session goes away, whether it came
+ * from "assume log means base 2" or from answering a question.  The
+ * assumed meanings are keyed by the word a note would name ("sqrt" for
+ * "the square root", "andor" for "and"/"or"), so a prefix is enough,
+ * with the two keys that are not a prefix of their word spelled out.
+ */
+static int
+pref_forget(const char *w)
+{
+	int i, gone = 0;
+
+	for (i = 0; i < nprefs; i++) {
+		const char *k = prefs[i].key;
+		int hit = !strncmp(w, k, strlen(k)) ||
+		    (!strcmp(k, "sqrt") && (!strcmp(w, "square") ||
+		    !strcmp(w, "root") || !strcmp(w, "roots"))) ||
+		    (!strcmp(k, "andor") && (!strcmp(w, "and") ||
+		    !strcmp(w, "or"))) ||
+		    (!strcmp(k, "nbit") && !strcmp(w, "n"));
+		if (!hit)
+			continue;
+		memmove(&prefs[i], &prefs[i + 1],
+		    (size_t)(nprefs - i - 1) * sizeof prefs[0]);
+		nprefs--;
+		gone++;
+		i--;
+	}
+	return gone;
+}
+
 static int
 interactive(void)
 {
@@ -470,6 +501,12 @@ tokenize(const char *s)
 			if (s[j] == '0' && (s[j + 1] == 'x' || s[j + 1] == 'X')) {
 				j += 2;
 				while (isxdigit((unsigned char)s[j]))
+					j++;
+			} else if (s[j] == '0' && (s[j + 1] == 'b' || s[j + 1] == 'B') &&
+			    (s[j + 2] == '0' || s[j + 2] == '1')) {
+				/* 0b1011: ucas reads binary with a 0b prefix */
+				j += 2;
+				while (s[j] == '0' || s[j] == '1')
 					j++;
 			} else {
 				while (isdigit((unsigned char)s[j]))
@@ -987,6 +1024,15 @@ num(const char *s)
 		e.hv = *end == 0 || (end[0] == 'f' && end[1] == 0);
 		if (s[0] == '0' && (s[1] == 'x' || s[1] == 'X'))
 			e.v = (double)strtoull(s, NULL, 16), e.hv = 1;
+		else if (s[0] == '0' && (s[1] == 'b' || s[1] == 'B')) {
+			/* 0b1011: binary, as ucas reads it */
+			const char *p = s + 2;
+			unsigned long long u = 0;
+			while (*p == '0' || *p == '1')
+				u = u * 2 + (unsigned long long)(*p++ - '0');
+			e.v = (double)u;
+			e.hv = *p == 0;
+		}
 	}
 	return e;
 }
@@ -1006,6 +1052,9 @@ mkpow(struct ex b, struct ex e, int word)
 }
 
 static struct ex parse_expr(int minprec);
+static int is_int(const char *s);
+static int reserved_word(const char *w);
+static int is_number(const char *s);
 
 /* ---- numbers in words ---- */
 
@@ -1141,6 +1190,76 @@ fraction_word(int i)
 	return den[k];
 }
 
+/*
+ * "1 million", "2.5 billion": a scale word right after a number.  Without
+ * it "1 million divided by 1000" stopped at "million".
+ */
+static void
+number_scale(struct ex *e)
+{
+	int64_t m;
+
+	if (W[wi].k != W_WORD || var_find(W[wi].s) || !mult_word(W[wi].s, &m))
+		return;
+	wi++;
+	*e = mkbin(*e, "*", num(S("%lld", (long long)m)), P_MUL);
+}
+
+/*
+ * "one and a half", "2 and three quarters": a mixed number, exactly
+ * ((e * den) + k) / den, so "1 and a half times 8" is 12, not 1 + 4.
+ * Consumes nothing when there is no fraction after "and".
+ */
+static int
+mixed_number(struct ex *e)
+{
+	int s = wi, den;
+	int64_t k = 1, v;
+
+	if (!isw(wi, "and"))
+		return 0;
+	wi++;
+	if (isw(wi, "a")) {
+		wi++;
+	} else if (W[wi].k == W_NUM && is_int(W[wi].s)) {
+		k = strtoll(W[wi].o, NULL, 10);
+		if (k < 1 || k > 9) {
+			wi = s;
+			return 0;
+		}
+		wi++;
+	} else if (W[wi].k == W_WORD && numword_val(W[wi].s, &v) && v >= 1 &&
+	    v <= 9) {
+		k = v;
+		wi++;
+	} else {
+		wi = s;
+		return 0;
+	}
+	if ((den = fraction_word(wi)) == 0) {
+		wi = s;
+		return 0;
+	}
+	wi++;
+	/* the parentheses matter: "1*2 + 1/2" would be one and a half * 2 */
+	*e = mkatom(S("(%s*%d + %lld)/%d", e->s, den, (long long)k, den),
+	    e->ity, 0);
+	return 1;
+}
+
+/* a lone letter that reads as a variable somewhere in this sentence */
+static int
+letter_used_here(int c)
+{
+	int i;
+
+	for (i = 0; i < nw; i++)
+		if (W[i].k == W_WORD && W[i].s[0] == (char)c && W[i].s[1] == 0 &&
+		    !reserved_word(W[i].s))
+			return 1;
+	return 0;
+}
+
 /* an exponent written as an ordinal: fourth, 4th, nth */
 static int
 ordinal(struct ex *e)
@@ -1164,6 +1283,39 @@ ordinal(struct ex *e)
 		return 2;
 	}
 	return 0;
+}
+
+/* "3.5 rounded": the nearest integer, halves away from zero */
+static struct ex
+round_of(struct ex a)
+{
+	/* the parentheses keep a minus in front of it off the comparison */
+	return mkatom(S("(%s >= 0 ? floor(%s + 0.5) : ceil(%s - 0.5))",
+	    paren(a, P_CMP, 1), a.s, a.s), 0, 0);
+}
+
+/* "7 factorial", "7!": prod over an index the expression does not use */
+static struct ex
+factorial_of(struct ex a)
+{
+	static const char *const idx[] = {"i", "k", "j", "m", "q", NULL};
+	const char *iv = NULL;
+	int k;
+
+	if (is_int(a.s) && strtoll(a.s, NULL, 10) > 20)
+		nfail("that factorial is past the integers here: say "
+		    "\"bigint %s!\" for the exact value", a.s);
+	if (is_int(a.s) && strtoll(a.s, NULL, 10) < 0)
+		nfail("a factorial needs a whole number that is not negative");
+	for (k = 0; idx[k]; k++)
+		if (!strchr(a.s, idx[k][0]) && !var_find(idx[k])) {
+			iv = idx[k];
+			break;
+		}
+	if (iv == NULL)
+		iv = "i0";
+	return mkatom(S("prod(%s, 1, %s, %s)", iv, paren(a, P_TERN, 0), iv),
+	    icomb(a.ity, 1), 0);
 }
 
 /* ---- types ---- */
@@ -1716,6 +1868,13 @@ want_wide(struct ex arg, int minprec, const char *pre, const char *post,
 
 	if (arg.closed || W[wi].k == W_END || issym(","))
 		return 0;
+	/*
+	 * "the sine of pi/2", "the square root of 2/3": a constant over a
+	 * number is the wide reading, no one means sin(pi)/2.
+	 */
+	if ((issym("/") || isw(wi, "over")) && W[wi + 1].k == W_NUM &&
+	    (is_number(arg.s) || !strcmp(arg.s, "pi") || !strcmp(arg.s, "e")))
+		return 1;
 	o = peek_bop();
 	if (o == NULL || (o->kind != B_NORM && o->kind != B_SWAP &&
 	    o->kind != B_OVER) || o->prec < lo || o->prec >= P_POW)
@@ -1872,8 +2031,9 @@ call_user(struct func *f, const char *name, int minprec)
 		for (k = 0; k < f->np; k++)
 			a[n++] = var_atom(sym_str(f->p[k].name));
 	}
+	/* a function of no parameters is the value itself: y, not y() */
 	if (n == 0)
-		return mkatom(S("%s()", name), 0, 0);
+		return mkatom(S("%s", name), 0, 0);
 	sb_printf(&sb, "%s(", name);
 	r = mkatom("", 0, 1);
 	for (k = 0; k < n; k++) {
@@ -1892,7 +2052,7 @@ call_user(struct func *f, const char *name, int minprec)
 /* word operators taking one operand */
 enum {
 	U_FN, U_SQRT, U_SQRTR, U_LOG, U_LOG2, U_LOG10, U_CBRT, U_RSQRT, U_SQ,
-	U_CUBE, U_NEG, U_NOT, U_BNOT, U_DIV, U_MUL, U_RECIP
+	U_CUBE, U_NEG, U_NOT, U_LNOT, U_BNOT, U_DIV, U_MUL, U_RECIP, U_ROUND
 };
 struct uop {
 	const char *pat;
@@ -1929,6 +2089,17 @@ static const struct uop uops[] = {
 	{"cos|cosine ?of", U_FN, "cos", 0},
 	{"?the tangent of", U_FN, "tan", 0},
 	{"tan|tangent ?of", U_FN, "tan", 0},
+	{"?the arcsine|arcsin|asin of", U_FN, "asin", 0},
+	{"?the inverse sine of", U_FN, "asin", 0},
+	{"?the arccosine|arccos|acos of", U_FN, "acos", 0},
+	{"?the inverse cosine of", U_FN, "acos", 0},
+	{"?the arctangent|arctan|atan of", U_FN, "atan", 0},
+	{"?the inverse tangent of", U_FN, "atan", 0},
+	{"?the hyperbolic sine|sinh of", U_FN, "sinh", 0},
+	{"?the hyperbolic cosine|cosh of", U_FN, "cosh", 0},
+	{"?the hyperbolic tangent|tanh of", U_FN, "tanh", 0},
+	{"the nearest integer to", U_ROUND, NULL, 0},
+	{"round of", U_ROUND, NULL, 0},
 	{"?the exponential of", U_FN, "exp", 0},
 	{"exp ?of", U_FN, "exp", 0},
 	{"e to the power of", U_FN, "exp", 0},
@@ -1979,12 +2150,12 @@ static const struct uop uops[] = {
 	{"?the float whose bits are", U_FN, "asfloat", 0},
 	{"?the negative|negation|opposite of", U_NEG, NULL, 0},
 	{"negative|minus", U_NEG, NULL, 0},
-	{"?the logical negation of", U_NOT, NULL, 0},
-	{"logical not", U_NOT, NULL, 0},
+	{"?the logical negation of", U_LNOT, NULL, 0},
+	{"logical not ?of", U_LNOT, NULL, 0},
 	{"?the bitwise not|complement|inverse of", U_BNOT, NULL, 0},
 	{"?the complement|ones-complement of", U_BNOT, NULL, 0},
 	{"bitwise not", U_BNOT, NULL, 0},
-	{"not", U_NOT, NULL, 0},
+	{"not ?of", U_NOT, NULL, 0},
 	{"?the square of", U_SQ, NULL, 0},
 	{"?the cube of", U_CUBE, NULL, 0},
 	{"?the reciprocal|inverse of", U_RECIP, NULL, 0},
@@ -2012,8 +2183,31 @@ apply_uop(const struct uop *u, struct ex a)
 	case U_FN:
 		return mkcall(u->fn, a);
 	case U_SQRT:
-		if (a.ity != 1)
+		if (a.ity != 1) {
+			/*
+			 * A constant has no type, and its square root is the
+			 * real one by default: sqrt(17).  A session that said
+			 * "assume square root means integer" gets isqrt.  When
+			 * the two differ and nothing was said, say what was
+			 * taken; a perfect square needs no note.
+			 */
+			if (is_number(a.s) && a.s[0] != '-') {
+				double v = strtod(a.s, NULL);
+				int pr = pref_get("sqrt");
+
+				if (pr >= 0)
+					return pr ? mkcall("sqrt", a) :
+					    mkcall("isqrt", a);
+				if (v == floor(v) && sqrt(v) != floor(sqrt(v)) &&
+				    !dry && !quiet)
+					printf("  note: the square root of a "
+					    "constant: read as the real one, sqrt(%s), "
+					    "not the floor root, isqrt (say \"integer "
+					    "square root\", or \"assume square root "
+					    "means integer\")\n", a.s);
+			}
 			return mkcall("sqrt", a);
+		}
 		k = clarify("sqrt", "\"square root\" of an integer", sq, 2, 0,
 		    "say \"integer square root\" or \"real square root\"");
 		return k ? mkcall("sqrt", mkcall("real", a)) : mkcall("isqrt", a);
@@ -2032,6 +2226,10 @@ apply_uop(const struct uop *u, struct ex a)
 	case U_LOG10:
 		return mkbin(mkcall("log", a), "/", mkatom("log(10)", 0, 1), P_MUL);
 	case U_CBRT:
+		/* the cube root of a negative number is real: -(|a|^(1/3)) */
+		if (is_number(a.s) && strtod(a.s, NULL) < 0)
+			return mkun("-", mkatom(S("(%s)^(1/3)",
+			    S("%g", -strtod(a.s, NULL))), 0, 0));
 		return mkbin(a, "^", mkbin(num("1"), "/", num("3"), P_MUL), P_POW);
 	case U_RSQRT:
 		return mkbin(num("1"), "/", mkcall("sqrt", a), P_MUL);
@@ -2047,7 +2245,16 @@ apply_uop(const struct uop *u, struct ex a)
 		k = clarify("not", "\"not\" of a number", no, 2, 0,
 		    "say \"bitwise not\" or \"logical not\"");
 		return mkun(k ? "!" : "~", a);
+	case U_LNOT:
+		return mkun("!", a);
 	case U_BNOT:
+		/* a whole-number literal has no width: ~5 in 32 bits, as C's int */
+		if (a.lit && is_int(a.s)) {
+			if (!dry && !quiet)
+				printf("  note: the bitwise not of a constant: "
+				    "taken in 32 bits (i32)\n");
+			return mkun("~", mkatom(S("i32(%s)", a.s), 1, 0));
+		}
 		return mkun("~", a);
 	case U_DIV:
 		return mkbin(a, "/", num(S("%d", u->k)), P_MUL);
@@ -2055,6 +2262,9 @@ apply_uop(const struct uop *u, struct ex a)
 		return mkbin(num(S("%d", u->k)), "*", a, P_MUL);
 	case U_RECIP:
 		return mkbin(num("1"), "/", a, P_MUL);
+	case U_ROUND:
+		/* half away from zero, as "rounded" is read */
+		return round_of(a);
 	}
 	return a;
 }
@@ -2100,6 +2310,9 @@ uop_shape(const struct uop *u, const char **pre, const char **post)
 		break;
 	case U_RECIP:
 		*pre = "1/(";
+		break;
+	case U_ROUND:
+		*pre = "round(";
 		break;
 	default:
 		*pre = "(";
@@ -2435,6 +2648,7 @@ parse_prefix(int minprec)
 	case W_NUM:
 		e = num(S("%s", W[wi].o));
 		wi++;
+		number_scale(&e);
 		/* units: 90r, 1.5 rad are radians; 90deg, 90 degrees, 90° */
 		if (W[wi].k == W_WORD && !W[wi].sp && (isw(wi, "r") ||
 		    isw(wi, "rad") || isw(wi, "rads")) && !var_find("r"))
@@ -2451,13 +2665,19 @@ parse_prefix(int minprec)
 	}
 	if (number_words(&v)) {
 		e = num(S("%lld", (long long)v));
+		number_scale(&e);
 fraction:
-		if ((den = fraction_word(wi)) != 0) {
+		if (mixed_number(&e)) {
+			if (mat("of"))
+				e = mkbin(e, "*", parse_expr(P_UNARY), P_MUL);
+		} else if ((den = fraction_word(wi)) != 0) {
 			wi++;
 			e = mkbin(e, "/", num(S("%d", den)), P_MUL);
 			e.lit = 1;
-			if (mat("of"))
+			if (mat("of")) {
 				e = mkbin(e, "*", parse_expr(P_UNARY), P_MUL);
+				e.lit = 0;
+			}
 		}
 		return e;
 	}
@@ -2597,6 +2817,26 @@ fraction:
 		b = parse_expr(P_MUL + 1);
 		return mkbin(a, "%", b, P_MUL);
 	}
+	/* "the fourth power of 3", "the 4th root of 16" */
+	s1 = wi;
+	if (mat("?the") && (k = ordinal(&a)) != 0) {
+		if (k == 2)
+			a = var_atom("n");
+		if (mat("?power of")) {
+			b = parse_expr(P_POW);
+			return mkpow(b, a, 1);
+		}
+		if (mat("?root of")) {
+			b = parse_expr(P_POW);
+			return mkpow(b, mkbin(num("1"), "/", a, P_MUL), P_POW);
+		}
+	}
+	wi = s1;
+	/* "the factorial of 7" */
+	if (mat("?the factorial|fact of")) {
+		a = parse_expr(P_UNARY);
+		return factorial_of(a);
+	}
 	for (k = 0; uops[k].pat; k++) {
 		const char *pre, *post;
 		s1 = wi;
@@ -2663,6 +2903,27 @@ fraction:
 	    "number|constant") || mat("the"))
 		return parse_prefix(minprec);
 	if (W[wi].k == W_WORD) {
+		/*
+		 * "2xy" where x and y are this sentence's variables is x*y:
+		 * a new two-letter variable next to both letters is nearly
+		 * always a product, and the note says which was read.
+		 */
+		if (varlike(wi) && strlen(W[wi].s) == 2 &&
+		    W[wi].s[0] != W[wi].s[1] && !var_find(W[wi].o) &&
+		    letter_used_here(W[wi].s[0]) &&
+		    letter_used_here(W[wi].s[1])) {
+			const char *w = S("%s", W[wi].o);
+			char l[2] = {W[wi].s[0], 0}, r[2] = {W[wi].s[1], 0};
+			struct ex le, re;
+			wi++;
+			le = var_atom(l);
+			re = var_atom(r);
+			if (!dry && !quiet)
+				printf("  note: read \"%s\" as %c*%c (both are "
+				    "variables here; name it to use it whole)\n", w,
+				    l[0], r[0]);
+			return mkbin(le, "*", re, P_MUL);
+		}
 		if (varlike(wi)) {
 			wi++;
 			/* "n-th" */
@@ -2730,6 +2991,17 @@ parse_postfix(struct ex e, int minprec)
 			e = mkbin(e, "^", x, P_POW);
 			continue;
 		}
+		/* "2 pi", "3 x": a number and a name, spaced, still multiply
+		 * (not inside an exponent: x^2 y is x^2*y, as ucas reads it) */
+		if (minprec <= P_MUL && e.lit && e.prec == P_ATOM && W[wi].sp &&
+		    !issym("(") &&
+		    ((isw(wi, "pi") || isw(wi, "e")) ||
+		    (varlike(wi) && strlen(W[wi].s) == 1 &&
+		    !peek("th|st|nd|rd")))) {
+			x = parse_expr(P_POW);
+			e = mkbin(e, "*", x, P_MUL);
+			continue;
+		}
 		/* 2x, 3(x + 1), 2pi */
 		if (e.lit && e.prec == P_ATOM && !W[wi].sp && (((varlike(wi) ||
 		    isw(wi, "pi")) && !peek("th|st|nd|rd")) || issym("(") ||
@@ -2755,6 +3027,28 @@ parse_postfix(struct ex e, int minprec)
 		}
 		if (e.lit && mat("percent")) {
 			e = mkbin(e, "/", num("100"), P_MUL);
+			continue;
+		}
+		/* "3.5 rounded", "2.6 rounded up", "1.5 rounded to the nearest" */
+		if (mat("rounded|round")) {
+			int way = 0;
+			if (mat("up|upwards"))
+				way = 1;
+			else if (mat("down|downwards"))
+				way = 2;
+			mat("?off");
+			mat("?to ?the ?nearest ?integer");
+			mat("?to ?the ?nearest ?whole ?number");
+			mat("?to ?the ?closest ?integer");
+			mat("?nearest|?closest");
+			mat("?integer|?whole|?number");
+			e = way == 1 ? mkcall("ceil", e) :
+			    way == 2 ? mkcall("floor", e) : round_of(e);
+			continue;
+		}
+		/* "7 factorial", "7!" */
+		if (e.lit && (mat("factorial|fact") || acc_sym("!"))) {
+			e = factorial_of(e);
 			continue;
 		}
 		break;
@@ -2821,6 +3115,22 @@ parse_expr(int minprec)
 				break;
 			}
 			l.closed = 1;
+		}
+		/*
+		 * "7/8 of 64": a fraction of a number (a division is already a
+		 * complete factor here, so "of" is not a binary operator)
+		 */
+		if (minprec <= P_MUL && l.prec == P_MUL && strchr(l.s, '/') &&
+		    mat("of")) {
+			r = parse_expr(P_UNARY);
+			l = mkbin(l, "*", r, P_MUL);
+			continue;
+		}
+		/* "10 choose 3": the language's binomial lives in bigint */
+		if (minprec <= P_MUL && mat("choose|binom")) {
+			r = parse_expr(P_UNARY);
+			nfail("there is no binomial function here: say \"bigint "
+			    "binomial(%s, %s)\" for the exact count", l.s, r.s);
 		}
 		o = match_bop();
 		if (o == NULL || o->prec < minprec) {
@@ -3176,7 +3486,7 @@ parse_clause(void)
 
 	st = mat("for|where|with|given|assuming|when|whenever|on|letting") ||
 	    mat("such|so that") || mat("over all|every|each|any") ||
-	    mat("let") || mat("and");
+	    mat("let") || mat("and") || mat("at");
 	/* "on [a, b]", "from a to b", "between a and b": the only variable */
 	{
 		struct ex a, b;
@@ -3211,6 +3521,16 @@ parse_clause(void)
 	memset(&d, 0, sizeof d);
 	if (parse_varlist(names, &n)) {
 		if (parse_descr(&d)) {
+			/*
+			 * "where x is a 4-bit unsigned x": the name (or a noun
+			 * for it) said again after the description.
+			 */
+			if (n == 1 && W[wi].k == W_WORD &&
+			    (!strcasecmp(W[wi].s, names[0]) ||
+			    isw(wi, "integer") || isw(wi, "int") ||
+			    isw(wi, "number") || isw(wi, "value") ||
+			    isw(wi, "variable")))
+				wi++;
 			declare(names, n, &d);
 			return 1;
 		}
@@ -3622,6 +3942,30 @@ parse_tail(void)
 		if (mat("please|thanks|again|too|now") || mat("thank you") ||
 		    mat("for me") || mat("as well") || mat("if possible") ||
 		    mat("if you can"))
+			continue;
+		/*
+		 * "90 degrees in radians", "pi/2 to degrees": an angle's unit.
+		 * A number written with "degrees" is already a number of
+		 * radians, so "in radians" adds nothing; "in degrees" turns
+		 * the value into degrees.
+		 */
+		{
+			int su = wi;
+
+			if ((Q.cmd == C_EVAL || Q.cmd == C_SHOW) && Q.a.e.s &&
+			    mat("in|to|into") &&
+			    mat("radians|rad|degrees|degs|deg")) {
+				int deg = isw(wi - 1, "degrees") ||
+				    isw(wi - 1, "degs") || isw(wi - 1, "deg");
+
+				if (deg)
+					Q.a.e = mkatom(S("(%s)*180/pi", Q.a.e.s), 0, 0);
+				continue;
+			}
+			wi = su;
+		}
+		/* "as a decimal": it already is one */
+		if (mat("as ?a|an decimal|number"))
 			continue;
 		return;
 	}
@@ -5085,6 +5429,8 @@ assume(void)
 	for (k = 0; tab[k].subj; k++) {
 		wi = s;
 		mat("?that ?the ?word");
+		/* "assume a byte is unsigned", "assume an int is 32-bit" */
+		mat("?a|an");
 		if (W[wi].k == W_NUM && isw(wi + 1, "bit")) /* "N-bit" written out */
 			;
 		if (!mat(tab[k].subj) && !(isw(wi, "n") && mat("n - bit")))
@@ -5161,7 +5507,8 @@ meta(void)
 	if (mat("forget|reset|clear")) {
 		if (mat("?all|everything|the|your|my ?assumptions|preferences|"
 		    "answers|choices|defaults|variables|meanings") &&
-		    W[wi].k == W_END) {
+		    (W[wi].k == W_END || (mat("completely|entirely|now") &&
+		    W[wi].k == W_END))) {
 			if (!dry) {
 				nprefs = nsv = nknown = 0;
 				puts("  ok: forgot every assumption");
@@ -5169,18 +5516,39 @@ meta(void)
 			Q.cmd = C_NONE;
 			return 1;
 		}
-		if (W[wi].k == W_WORD && W[wi + 1].k == W_END) {
+		{
+			int ft = wi;
+
+			mat("?the");
+			if (W[wi].k != W_WORD || (W[wi + 1].k != W_END &&
+			    !(isw(wi, "square") && isw(wi + 1, "root") &&
+			    W[wi + 2].k == W_END)))
+				wi = ft;
+		}
+		if (W[wi].k == W_WORD && (W[wi + 1].k == W_END ||
+		    (isw(wi, "square") && isw(wi + 1, "root") &&
+		    W[wi + 2].k == W_END))) {
+			int two = isw(wi, "square");
 			if (!dry) {
+				int gone = 0;
 				for (n = 0; n < nsv; n++)
 					if (!strcmp(SV[n].name, W[wi].o)) {
 						memmove(&SV[n], &SV[n + 1],
 						    (size_t)(nsv - n - 1) * sizeof SV[0]);
 						nsv--;
+						gone = 1;
 						break;
 					}
-				printf("  ok: forgot %s\n", W[wi].o);
+				gone += pref_forget(W[wi].s);
+				if (gone)
+					printf("  ok: forgot %s%s\n", W[wi].o,
+					    two ? " root" : "");
+				else
+					printf("  note: no meaning was kept for "
+					    "\"%s%s\" (nothing to forget)\n", W[wi].o,
+					    two ? " root" : "");
 			}
-			wi++;
+			wi += two ? 2 : 1;
 			Q.cmd = C_NONE;
 			return 1;
 		}
@@ -6283,6 +6651,12 @@ sentence(void)
 {
 	int s, c, verb = 0, wordy;
 
+	/*
+	 * No request of the previous sentence survives this one: a
+	 * derivative followed by a definition used to run the derivative
+	 * again (c2_finish still saw it).
+	 */
+	memset(&C2, 0, sizeof C2);
 	fillers();
 	if (W[wi].k == W_END) {
 		Q.cmd = C_NONE;
@@ -7046,6 +7420,13 @@ finish(void)
 		printf("  note: %s\n", Q.why);
 	if (c2_finish())
 		return;
+	/* a variable the sentence declares and never asks about: say so */
+	if (!dry)
+		for (k = 0; k < nv; k++)
+			if (V[k].decl && !V[k].uses && !V[k].val[0] &&
+			    Q.cmd != C_DEF && Q.cmd != C_NONE)
+				printf("  note: %s is declared but not used here\n",
+				    V[k].name);
 	if (Q.cmd == C_PLOT) {
 		emit_plot();
 		return;
@@ -8293,6 +8674,16 @@ nlp_is_english(const char *s, size_t n)
 				j2 = j3;
 			if (!word_at(s, n, &j2, w2, sizeof w2))
 				return 0;
+			/*
+			 * "table of", "find of", "show the": nothing to read,
+			 * so the translator says what is missing (ucas would
+			 * read "of" as o*f).  Only a word that cannot be the
+			 * command's own argument: "dword a" is a whole
+			 * command, "of" and "the" are not.
+			 */
+			if (j2 >= n && (!strcmp(w2, "of") || !strcmp(w2, "the") ||
+			    !strcmp(w2, "an")))
+				return 1;
 			/* "integrate x squared" is English, "integrate x^2" not */
 			if (!in_list(cmd_followers, w2))
 				return english_words(s + j, n - j, 1) >= 1;

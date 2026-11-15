@@ -1,0 +1,34 @@
+> what is the log of 8?
+  note: "log" without a base: log base 2 (kept for this session)
+  ucas: log(8)/log(2)
+3
+> what is the log of 1024?
+  ucas: log(1024)/log(2)
+10
+> what is the range of x for a byte x?
+  note: "byte" without signed or unsigned: signed, i8 (kept for this session)
+  ucas: it(x: i8) = x
+  ucas: range it
+range of it -> i8:
+  -128..127   (256 distinct values)
+  fits in i8
+  over all 256 points of the domain
+> what is the range of x plus 1 for a byte x?
+  ucas: it(x: i8) = x + 1
+  ucas: range it
+range of it -> i8:
+  -128..127   (256 distinct values)
+  fits in i8
+  over all 256 points of the domain
+> what is the square root of x plus 1 where x is a 4-bit unsigned x?
+  note: "99" is not one of the 2 choices for "square root" of an integer: read as the floor square root, isqrt
+  note: "square root" of an integer: the floor square root, isqrt (kept for this session)
+  ucas: it(x: u4) = isqrt(x) + 1
+  ucas: show it
+it(x: u4) = isqrt(x) + 1
+  -> u4
+> what is the square root of x plus 1 where x is a 4-bit unsigned x?
+ask choice 2
+? what does "the square root of" apply to:
+  1) sqrt(x) + ...  (default)
+  2) sqrt(x + ...)

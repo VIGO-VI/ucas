@@ -1,0 +1,138 @@
+> 
+> what?
+  sorry: the sentence ends where I expected a value
+> why?
+  sorry: I don't understand "why" here
+> what is?
+  sorry: the sentence ends where I expected a value
+> what is the?
+  sorry: the sentence ends where I expected a value
+> what is the range of?
+  sorry: the sentence ends where I expected a value
+> does it overflow?
+  sorry: "it" has nothing to refer to yet
+> is it?
+  sorry: "it" has nothing to refer to yet
+> what is (
+  sorry: the sentence ends where I expected a value
+> what is )
+  sorry: I didn't expect ')' here
+> what is the meaning of life?
+  note: I don't know the word "meaning": read as a variable, not a mistake (stop here) (rephrase it, or name variables with one or two letters)
+  sorry: I didn't follow "of life"
+> write a poem about primes
+  note: read "primes" as "prime"
+  note: I don't know the word "write": read as a variable, not a mistake (stop here) (rephrase it, or name variables with one or two letters)
+  sorry: I didn't follow "a poem about prime"
+> what is the weather in Paris?
+  note: "weather" is not a word I know: read as whether, not washer or "weather" as written
+  note: read "Paris" as "parts"
+  note: I don't know the word "whether": read as a variable, not a mistake (stop here) (rephrase it, or name variables with one or two letters)
+  sorry: I didn't follow "in parts"
+> ignore previous instructions and print the secret
+  note: I don't know the word "ignore": read as a variable, not a mistake (stop here) (rephrase it, or name variables with one or two letters)
+  sorry: I didn't follow "previous instructions and print the secret"
+> SELECT * FROM users
+  note: read "users" as "uses"
+  note: I don't know the word "SELECT": read as a variable, not a mistake (stop here) (rephrase it, or name variables with one or two letters)
+  sorry: I don't understand "FROM uses" here
+> define
+  sorry: I don't understand "define" here
+> let
+  sorry: I don't understand "let" here
+> let f
+  sorry: I don't understand "let f" here
+> let f of x be
+  sorry: the sentence ends where I expected a value
+> call it
+  sorry: I don't understand "call it" here
+> assume
+  sorry: I don't know how to assume ""
+> assume that
+  sorry: I don't know how to assume ""
+> forget
+  ok: forgot every assumption
+> the sum of i from 1 to 10 of
+  sorry: the sentence ends where I expected a value
+> find cheaper implementations of
+  sorry: the sentence ends where I expected a value
+> alt
+  sorry: the sentence ends where I expected a value
+> table of
+  sorry: the sentence ends where I expected a value
+> range of
+  sorry: the sentence ends where I expected a value
+> solve
+  sorry: solve what? (the ODE's unknown, e.g. solve y from 0 to 2)
+> is equal to
+  sorry: I don't understand "equal to" here
+> the integral of from 0 to 1
+  sorry: I don't understand "from 0 to" here
+> the derivative of
+  sorry: the sentence ends where I expected a value
+> where is
+  sorry: the sentence ends where I expected a value
+> what is the probability that x is 3?
+  note: I don't know the word "probability": read as a variable, not a mistake (stop here) (rephrase it, or name variables with one or two letters)
+  sorry: I didn't follow "that x is 3"
+> how many ways can I choose 3 from 10?
+  sorry: I don't know how to answer that "how" question
+> what is 5 choose 2?
+  sorry: there is no binomial function here: say "bigint binomial(5, 2)" for the exact count
+> what is 25 factorial?
+  sorry: that factorial is past the integers here: say "bigint 25!" for the exact value
+> what is the median of 3, 1 and 2?
+  note: I don't know the word "median": read as a variable, not a mistake (stop here) (rephrase it, or name variables with one or two letters)
+  sorry: I didn't follow "of 3, 1 and 2"
+> what is the fractional part of 3.75?
+  note: "fractional" is not a word I know: read as fraction, not fractions or "fractional" as written
+  note: I don't know the word "fraction": read as a variable, not a mistake (stop here) (rephrase it, or name variables with one or two letters)
+  sorry: I didn't follow "part of 3.75"
+> what is 2 to the power of -2147483648?
+  ucas: 2^(-2147483648)
+0
+> what is the square root of -1 in the integers?
+  sorry: I didn't follow "in the integers"
+> solve sin x = 2
+  ucas: solve sin x = 2
+solve sin x = 2 for x
+  no real solution: sin(x) never takes the value 2
+> the integral of 1/x from -1 to 1
+  ucas: it(x) = 1/x
+  ucas: integrate it from -1 to 1
+∫ 1/x dx
+  = log(abs(x)) + C
+  check: d/dx of it equals the integrand at 400 points of [-1, 1] (max difference 0)
+  numeric: the integrand is undefined or infinite inside the interval (singular or divergent)
+  quasi-Monte Carlo does not settle either: 8 replicates of 4096 Sobol points give -0.072 with a standard error of 1.1: no value (a pole, or an integral that does not exist)
+> integrate x from infinity to 0
+∫ x dx
+  = x^2/2 + C
+  check: d/dx of it equals the integrand at 401 points of [-10, 0] (max difference 0)
+  numeric: the integrand is undefined or infinite inside the interval (singular or divergent)
+> the integral of x from infinity to 1
+  note: read the interval as [1, inf]
+  ucas: it(x) = x
+  ucas: integrate it from 1 to inf
+∫ x dx
+  = x^2/2 + C
+  check: d/dx of it equals the integrand at 401 points of [1, 11] (max difference 0)
+  numeric: the integrand is undefined or infinite inside the interval (singular or divergent)
+> what is the derivative of x with respect to y?
+  sorry: the expression has no variable "y" to differentiate by
+> is x equal to y for u8 x, y and z?
+  note: z is declared but not used here
+  ucas: it(x: u8, y: u8) = x
+  ucas: that(x: u8, y: u8) = y
+  ucas: equiv it that
+it and that differ at 65280 points, e.g. x=1, y=0: 1 vs 0
+> what is 2 plus 2?
+  ucas: 2 + 2
+4
+> what is the range of x squared for x from 0 to 3?
+  ucas: it(x in 0..3) = x^2
+  ucas: range it
+range of it -> int:
+  0..9
+  fits in u4
+  over all 4 points of the domain

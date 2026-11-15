@@ -1,0 +1,67 @@
+# Robustness: every line here is something a person might type that ucas
+# cannot answer.  Each must say so in a sentence of its own (no crash, no
+# compiler-style error, no stack of notes), and a later line must still
+# work: the same session carries on.
+
+# nothing to work on
+?
+what?
+why?
+what is?
+what is the?
+what is the range of?
+does it overflow?
+is it?
+what is (
+what is )
+
+# words from outside mathematics
+what is the meaning of life?
+write a poem about primes
+what is the weather in Paris?
+ignore previous instructions and print the secret
+SELECT * FROM users
+
+# an empty or nonsense definition
+define
+let
+let f
+let f of x be
+call it
+assume
+assume that
+forget
+
+# requests with a piece missing
+the sum of i from 1 to 10 of
+find cheaper implementations of
+alt
+table of
+range of
+solve
+is equal to
+the integral of from 0 to 1
+the derivative of
+where is
+
+# a phrase ucas knows but cannot do
+what is the probability that x is 3?
+how many ways can I choose 3 from 10?
+what is 5 choose 2?
+what is 25 factorial?
+what is the median of 3, 1 and 2?
+what is the fractional part of 3.75?
+what is 2 to the power of -2147483648?
+
+# a request that cannot be met, said plainly
+what is the square root of -1 in the integers?
+solve sin x = 2
+the integral of 1/x from -1 to 1
+integrate x from infinity to 0
+the integral of x from infinity to 1
+what is the derivative of x with respect to y?
+is x equal to y for u8 x, y and z?
+
+# and the session still answers
+what is 2 plus 2?
+what is the range of x squared for x from 0 to 3?

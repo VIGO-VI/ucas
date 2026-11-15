@@ -1,0 +1,333 @@
+> what is 2 to the 10th?
+  ucas: 2^10
+1024
+> what is two hundred fifty-six divided by 4?
+  ucas: 256/4
+64
+> what is ten thousand minus one?
+  ucas: 10000 - 1
+9999
+> what is 1 million divided by 1000?
+  ucas: 1*1000000/1000
+1000
+> what is 2.5 million plus 1?
+  ucas: 2.5*1000000 + 1
+2.5e+06
+> what is 1e3 plus 1?
+  ucas: 1e3 + 1
+1001
+> what is 0.1 plus 0.2?
+  ucas: 0.1 + 0.2
+0.3
+> what is 1.5 times 4?
+  ucas: 1.5*4
+6
+> what is 0x2a times 2?
+  ucas: 0x2a*2
+84
+> what is 0b1111 plus 0b1?
+  ucas: 0b1111 + 0b1
+16
+> what is negative three squared?
+  ucas: -3^2
+-9
+> what is minus 5 plus 8?
+  ucas: -5 + 8
+3
+> what is 3 plus 4 times 2?
+  ucas: 3 + 4*2
+11
+> what is 9 minus 10?
+  ucas: 9 - 10
+-1
+> what is minus 3 times minus 4?
+  ucas: -3*(-4)
+12
+> what is half of 97?
+  ucas: 97/2
+48.5
+> what is a third of 120?
+  ucas: 120/3
+40
+> what is 3 quarters of 88?
+  ucas: 3/4*88
+66
+> what is 2 fifths of 50?
+  ucas: 2/5*50
+20
+> what is three tenths of 50?
+  ucas: 3/10*50
+15
+> what's 20 percent of 150?
+  ucas: 150*20/100
+30
+> what is 30 percent of 80?
+  ucas: 80*30/100
+24
+> what is 12.5 percent of 400?
+  ucas: 400*12.5/100
+50
+> what is 7/8 of 64?
+  ucas: 7/8*64
+56
+> what is 1 and a half times 8?
+  ucas: (1*2 + 1)/2*8
+12
+> what is two and three quarters times 4?
+  ucas: (2*4 + 3)/4*4
+11
+> what is 3 and a half of 10?
+  ucas: (3*2 + 1)/2*10
+35
+> what is half of a third of 30?
+  ucas: 30/3/2
+5
+> what is 7 divided by 2?
+  ucas: 7/2
+3.5
+> what is 7 over 2?
+  ucas: 7/2
+3.5
+> what is 2 squared plus 3 cubed?
+  ucas: 2^2 + 3^3
+31
+> what is the square of 12?
+  ucas: 12^2
+144
+> what is the cube of 5?
+  ucas: 5^3
+125
+> what is the fourth power of 3?
+  ucas: 3^4
+81
+> what is 10 to the 5th power?
+  ucas: 10^5
+100000
+> what is 2 to the power 8?
+  ucas: 2^8
+256
+> what is 2^3^2?
+  ucas: 2^3^2
+512
+> what is the square root of 2?
+  note: the square root of a constant: read as the real one, sqrt(2), not the floor root, isqrt (say "integer square root", or "assume square root means integer")
+  ucas: sqrt(2)
+1.41421
+> what is the square root of 144?
+  ucas: sqrt(144)
+12
+> what is the integer square root of 145?
+  ucas: isqrt(145)
+12
+> what is the real square root of 145?
+  ucas: sqrt(145)
+12.0416
+> what is the cube root of 27?
+  ucas: 27^(1/3)
+3
+> what is the cube root of -8?
+  ucas: -(8)^(1/3)
+-2
+> what is the 4th root of 16?
+  ucas: 16^(1/4)
+2
+> what is e to the power of 2?
+  ucas: exp(2)
+7.38906
+> what is 2 to the power of 0.5?
+  ucas: 2^0.5
+1.41421
+> what is the absolute value of minus 7?
+  ucas: abs(-7)
+7
+> what is the sign of -5?
+  ucas: sign(-5)
+-1
+> what is floor of 3.7?
+  ucas: floor(3.7)
+3
+> what is the ceiling of 3.2?
+  ucas: ceil(3.2)
+4
+> what is 3.5 rounded to the nearest integer?
+  ucas: (3.5 >= 0 ? floor(3.5 + 0.5) : ceil(3.5 - 0.5))
+4
+> what is 2.6 rounded up?
+  ucas: ceil(2.6)
+3
+> what is 2.6 rounded down?
+  ucas: floor(2.6)
+2
+> what is -2.5 rounded?
+  ucas: -(2.5 >= 0 ? floor(2.5 + 0.5) : ceil(2.5 - 0.5))
+-3
+> what is the nearest integer to -2.5?
+  ucas: (-2.5 >= 0 ? floor(-2.5 + 0.5) : ceil(-2.5 - 0.5))
+-3
+> what is 7 factorial?
+  ucas: prod(i, 1, 7, i)
+5040
+> what is the factorial of 6?
+  ucas: prod(i, 1, 6, i)
+720
+> what is 5!?
+  ucas: prod(i, 1, 5, i)
+120
+> what is 10 factorial divided by 8 factorial?
+  ucas: prod(i, 1, 10, i)/prod(i, 1, 8, i)
+90
+> what is 4! / 2!?
+  ucas: prod(i, 1, 4, i)/prod(i, 1, 2, i)
+12
+> what is the gcd of 84 and 36?
+  ucas: gcd 84, 36
+gcd 84, 36
+  = 12
+> what is the greatest common divisor of 1071 and 462?
+  ucas: gcd 1071, 462
+gcd 1071, 462
+  = 21
+> what is the lcm of 6 and 8?
+  ucas: lcm 6, 8
+lcm 6, 8
+  = 24
+> what is the least common multiple of 21 and 6?
+  ucas: lcm 21, 6
+lcm 21, 6
+  = 42
+> what is 17 mod 5?
+  ucas: 17 % 5
+2
+> what is 10 mod 3 plus 1?
+  ucas: 10 % 3 + 1
+2
+> what is 100 mod 7?
+  ucas: 100 % 7
+2
+> what is the remainder when 100 is divided by 7?
+  ucas: 100 % 7
+2
+> what is the remainder of 100 divided by 7?
+  ucas: 100 % 7
+2
+> the quotient of 100 divided by 7
+  ucas: floor(100/7)
+14
+> what is 100 divided by 7?
+  ucas: 100/7
+14.2857
+> what is the sum of 1, 2 and 3?
+  ucas: 1 + 2 + 3
+6
+> what is the product of 2, 3 and 4?
+  ucas: 2*3*4
+24
+> what is the average of 3, 4 and 5?
+  ucas: (3 + 4 + 5)/3
+4
+> what is the mean of 1, 2, 3 and 4?
+  ucas: (1 + 2 + 3 + 4)/4
+2.5
+> what is the maximum of 3 and 5?
+  ucas: max(3, 5)
+5
+> what is the maximum of 4, 9 and 2?
+  ucas: max(max(4, 9), 2)
+9
+> what is the minimum of 3 and 5?
+  ucas: min(3, 5)
+3
+> what is 5 squared minus 4 squared?
+  ucas: 5^2 - 4^2
+9
+> what is 2 times (3 plus 4)?
+  ucas: 2*(3 + 4)
+14
+> what is the number of set bits in 255?
+  ucas: popcount(255)
+8
+> what is the number of set bits in 0xff?
+  ucas: popcount(0xff)
+8
+> what is the number of leading zeros in 1?
+  ucas: clz(1)
+63
+> what is the number of trailing zeros in 8?
+  ucas: ctz(8)
+3
+> what is 8 bitwise or 1?
+  ucas: 8 | 1
+9
+> what is 6 and 5?
+  note: "and"/"or" between numbers: read as bitwise (& and |), not logical (&& and ||) (say "bitwise and" or "logical and")
+  ucas: 6 & 5
+4
+> what is 6 or 3?
+  ucas: 6 | 3
+7
+> what is the bitwise not of 0?
+  note: the bitwise not of a constant: taken in 32 bits (i32)
+  ucas: ~i32(0)
+-1
+> what is x shifted left by 3?
+  ucas: it(x) = x << 3
+  ucas: show it
+  note: x has no type: inferred int from the integer operations in the body
+it(x: int) = x << 3
+  -> int
+> what is 255 shifted right by 4?
+  ucas: 255 >> 4
+15
+> what is 90 degrees in radians?
+  ucas: 90*pi/180
+1.5708
+> what is pi/2 in degrees?
+  ucas: (pi/2)*180/pi
+90
+> what is 45 degrees in radians?
+  ucas: 45*pi/180
+0.785398
+> what is sin of 30 degrees?
+  ucas: sin(30*pi/180)
+0.5
+> what is the sine of pi/2?
+  ucas: sin(pi/2)
+1
+> what is cos of 60 degrees?
+  ucas: cos(60*pi/180)
+0.5
+> what is tan of 45 degrees?
+  ucas: tan(45*pi/180)
+1
+> what is the arcsine of 1?
+  ucas: asin(1)
+1.5708
+> what is arctan of 1?
+  ucas: atan(1)
+0.785398
+> what is the natural log of e?
+  ucas: log(e)
+1
+> what is log base 2 of 1024?
+  ucas: log(1024)/log(2)
+10
+> what is log base 10 of 1000?
+  ucas: log(1000)/log(10)
+3
+> what is log base 2 of 64?
+  ucas: log(64)/log(2)
+6
+> what is the square root of x plus 1 where x is a real?
+  note: what does "the square root of" apply to: read as sqrt(x) + ..., not sqrt(x + ...) (say "the square root of the quantity ..." for the second)
+  ucas: it(x: real) = sqrt(x) + 1
+  ucas: show it
+it(x: real) = sqrt(x) + 1
+  -> real
+> what is 2 pi?
+  ucas: 2*pi
+6.28319
+> what is 3 x squared?
+  ucas: it(x) = 3*x^2
+  ucas: show it
+it(x: real) = 3x^2
+  -> real

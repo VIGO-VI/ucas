@@ -1,0 +1,129 @@
+# Requests: one sentence per command family, in the words a person would
+# use (src/nlp.c and its nlp_*.inc tables).  Each line ends in the ucas
+# statements it was read as, then their answer.
+
+# range, domain, overflow
+range of x squared for x from -3 to 3
+what is the range of x squared for x from -3 to 3?
+what is the range of sin theta for theta between 0 and pi?
+what is the range of the integer square root of an 8-bit unsigned x?
+what is the range of x plus 1 for a 4-bit unsigned x?
+what is the domain of 1/x?
+where is 1/(x-1) discontinuous?
+does 2x + 3 overflow for a signed byte x?
+is x squared ever negative for a signed byte x?
+does x times 2 plus 1 overflow for a signed byte x?
+what are the critical points of x cubed minus 3x?
+where is x cubed minus 3x increasing?
+where is x cubed minus 3x decreasing?
+
+# derivatives, limits, series
+the derivative of sin x squared with respect to x
+the derivative of x squared times sin x
+what is the second derivative of x cubed?
+what is the derivative of myabs?
+d/dx of x^3
+the partial derivative of x^2 y with respect to y
+the gradient of x^2 y at (1, 2)
+the laplacian of x^2 y^2
+the limit of sin x / x as x approaches 0
+the limit of (1 - cos x)/x^2 as x approaches 0
+lim x->0 of (1 - cos x)/x^2
+the taylor series of exp x about 0 to order 4
+the maclaurin series of sin x to order 5
+the antiderivative of x squared
+integrate x squared from 0 to 1
+what is the integral of sin x from 0 to pi?
+what is the area under x^2 from 0 to 4 nofile?
+
+# equivalence, error, fit, gates, find
+avg(a: u8, b: u8) = (a + b) / 2
+is x squared equal to x times x?
+are (x + y)^2 and x^2 + 2xy + y^2 equivalent for u8 x and y?
+is (x & y) + ((x xor y) >> 1) equal to (x + y) / 2 for u8 x and y?
+is avg commutative?
+is avg associative?
+are x plus y and y plus x equivalent for u8 x and y?
+is x squared even?
+is sin x periodic?
+find the period of sin(2x)
+rsqrt(x: f32 in 0.01..100) = 1/sqrt(x)
+guess(x: f32, K: u32) = asfloat(K - (asuint(x) >> 1))
+find the best constant for guess to approximate rsqrt
+quake(x: f32) = asfloat(1597463007 - (asuint(x) >> 1))
+how accurate is quake as an approximation of rsqrt?
+find 3 cheaper implementations of x squared mod 7
+days(m: u8 in 1..12) = match m { 2 => 28, 4 | 6 | 9 | 11 => 30, _ => 31 }
+find cheaper implementations of days
+what is the cost of x * 3 on zen4?
+what is the cost of (x * 3) >> 1 on zen4?
+give me a table of values of x squared mod 7 for x from 0 to 10
+what is the maximum of a and b when a is 3 and b is 5?
+
+# algebra
+factor x squared minus 1
+factorise x^4 - 1
+expand (x+1)^3
+simplify (x^2-1)/(x-1)
+collect the terms of x^2 + 2x + 1 in x
+put 1/x + 1/(x+1) over a common denominator
+partial fraction decomposition of 1/(x^2-1)
+solve x^2 - 5x + 6 = 0
+solve sin x = 1/2
+solve the system x + y = 3, x - y = 1 for x and y
+the gcd of x^2-1 and x^2+2x+1
+the lcm of x^2-1 and x+1
+the discriminant of x^2 - 4
+divide x^3 - 1 by x - 1
+substitute x = 2 in x^3 - 1
+
+# properties
+is f monotonic?
+is x squared even?
+where does x^3 - x cross zero?
+the asymptotes of 1/(x-1)
+identify the equation x^2 + y^2 = 1
+what kind of equation is y'' + y = 0?
+is 1/x bounded on 1 to 2?
+is sin x bounded?
+
+# rings, finite fields
+the inverse of 3 mod 256
+is Z/12 a field?
+in GF(2^8) with the AES polynomial multiply 0x57 by 0x83
+the magic number for dividing a u32 by 7
+x congruent to 2 mod 3 and 3 mod 5
+
+# complex numbers and trig forms
+the polar form of 1 + i
+write (1+2i)/(3-i) in a+bi form
+real and imaginary parts of e^(ix)
+modulus and argument of 3 + 4i
+convert 2 cis(pi/3) to rectangular form
+the 5th roots of unity
+solve z^4 = -16
+rewrite sin^2 x using double angle
+express tan x in terms of sin and cos
+simplify sin x cos x
+product to sum of sin x cos y
+write 3 sin x + 4 cos x in the form R sin(x + phi)
+
+# transforms, series and sums
+the laplace transform of t^2 e^-t
+inverse laplace of 1/(s^2+1)
+the z transform of a^n u[n]
+the fourier series of a square wave on -1 to 1
+fourier transform of e^(-x^2)
+the dft of [1, 2, 3, 4]
+does the sum of 1/n^2 converge?
+what is the sum of 1/n^2 from 1 to infinity?
+radius of convergence of the sum of x^n/n!
+the generating function of fibonacci
+the closed form of the sum of i squared for i from 1 to n
+the sum over k from 1 to 10 of k cubed
+what is the product of i for i from 1 to 6?
+
+# differential equations
+y' = -2y + 1
+y(0) = 3
+solve y from 0 to 2 in 2 steps

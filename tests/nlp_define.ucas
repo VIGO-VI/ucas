@@ -1,0 +1,46 @@
+# Definitions, variables and follow-ups (src/nlp.c "Variables", "definitions")
+let f of x be x squared plus 1 where x is between 0 and 10
+what is its range?
+what is f when x is 3?
+what is f of 2?
+f of 5
+let g of x be 2 x plus 1
+call it twice_one
+what is twice_one of 4?
+what is g of 4?
+let h of p and q be p times q plus 1
+what is h of 2 and 3?
+define k of x as x cubed
+what is k of 3?
+f(x) = x^2 + 2x + 1
+what is the range of f for x from 0 to 3?
+what are the roots of f?
+g of x is 3x minus 1
+what is g of 2?
+let p of x be x cubed minus 3x
+what are the critical points of p?
+what is the derivative of p?
+what is the second derivative of p?
+let y be 5
+what is y plus 1?
+x if x is positive, otherwise minus x; call it myabs
+what is the derivative of myabs?
+what is myabs of -3?
+what is the range of myabs for x from -4 to 4?
+x is a byte
+what is the range of x plus 1?
+assume q is a signed byte
+what is the range of q?
+what is the range of x plus 1 for an unsigned byte x?
+what is the range of n for an integer n between 1 and 12?
+what is the range of 2 to the n for n between 0 and 10?
+does x times x overflow for a 16-bit unsigned x?
+what is the range of x divided by 2 for a 32-bit signed x?
+avg(a: u8, b: u8) = (a + b) / 2
+does avg overflow?
+is avg equal to (a & b) + ((a xor b) >> 1)?
+is avg commutative?
+is 2 to the 10th bigger than 10 squared?
+what is x squared at x = 3?
+what is sin x at x = pi/6?
+what is f of g of 2?

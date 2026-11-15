@@ -335,6 +335,16 @@ alg_sentence(void)
 				return alg_out(v ? S("divide %s by %s in %s", form_expr(a,
 				    e1), form_expr(s2, b), v) : S("divide %s by %s",
 				    form_expr(a, e1), form_expr(s2, b)));
+			/*
+			 * A number divided by a number is arithmetic: the
+			 * polynomial quo/rem of two constants reads as 100/7.
+			 * "the remainder of x divided by 7" is x % 7 too.
+			 */
+			if (!v && is_number(form_expr(s2, b)))
+				return alg_out(!strcmp(cmd, "quo") ?
+				    S("floor(%s/%s)", form_expr(a, e1),
+				    form_expr(s2, b)) : S("%s %% %s",
+				    form_expr(a, e1), form_expr(s2, b)));
 			return alg_out(v ? S("%s %s, %s in %s", cmd, form_expr(a, e1),
 			    form_expr(s2, b), v) : S("%s %s, %s", cmd, form_expr(a, e1),
 			    form_expr(s2, b)));
