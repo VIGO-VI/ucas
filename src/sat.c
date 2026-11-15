@@ -651,7 +651,8 @@ aig_word_value(const struct aig *g, const struct word *x)
 	uint64_t v = 0;
 	int i;
 
-	for (i = 0; i < x->w; i++)
+	/* a word may be wider than 64 bits: the rest of v stays zero */
+	for (i = 0; i < x->w && i < 64; i++)
 		if (aig_value(g, x->b[i]))
 			v |= 1ULL << i;
 	return v;
@@ -666,7 +667,7 @@ w_const(struct word *r, int w, uint64_t v)
 
 	r->w = w;
 	for (i = 0; i < w; i++)
-		r->b[i] = (v >> i & 1) ? L_TRUE : L_FALSE;
+		r->b[i] = (i < 64 && (v >> i & 1)) ? L_TRUE : L_FALSE;
 }
 
 void
