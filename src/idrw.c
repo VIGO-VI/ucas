@@ -737,6 +737,7 @@ map_try(struct ivc *c, nid root, struct mapv *m, int slot, struct irw **out,
 {
 	nid s = m->s, x = m->x;
 	int added = 0;
+	int64_t span;
 
 	if (N.ty[x] == TY_BOOL || N.ty[x] == TY_LIT)
 		return 0;
@@ -748,10 +749,18 @@ map_try(struct ivc *c, nid root, struct mapv *m, int slot, struct irw **out,
 			return 0;
 		m->t = TY_INT;
 	}
-	if (m->hi < m->lo || m->hi - m->lo >= MAP_POINTS || m->hi - m->lo < 1 ||
-	    m->lo <= -(1LL << 31) || m->hi >= (1LL << 32))
+	if (m->hi < m->lo)
 		return 0;
-	m->K = (int)(m->hi - m->lo + 1);
+	/*
+	 * The span as a subtraction of unsigned values: hi - lo overflows
+	 * int64 when the map is the whole of int64 (hi = 2^63-1, lo = -2^63),
+	 * which is a range too wide to map anyway.
+	 */
+	span = (int64_t)((uint64_t)m->hi - (uint64_t)m->lo);
+	if (span >= MAP_POINTS || span < 1 || m->lo <= -(1LL << 31) ||
+	    m->hi >= (1LL << 32))
+		return 0;
+	m->K = (int)(span + 1);
 	/* one compare of the variable: a threshold is already one operation */
 	if ((opinfo[N.op[s]].fl & OF_CMP) && (N.a[s] == x || is_const(N.a[s])) &&
 	    (N.b[s] == x || is_const(N.b[s])))
