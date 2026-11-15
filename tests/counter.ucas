@@ -1,0 +1,59 @@
+# Counterexamples: every way ucas answers "no, and here is the input".
+# Each "differs at ... e.g. ..." line is the tool's counterexample: an input
+# where the two sides disagree, checked by the evaluator.
+
+# 1. enumerated on reals: the difference is a number, so the sample finds it
+f(x in 0..4) = x*(x - 1)/2
+g(x in 0..4) = x^2/2 - x/2 + 1
+equiv f g
+
+# 2. machine integers: the first witness in the domain's order
+h(x: u8) = x/2
+k(x: u8) = x >> 1
+equiv h k
+avg(a: u8, b: u8) = (a + b)/2
+low(a: u8, b: u8) = (a & b) + ((a xor b) >> 1)
+equiv avg low
+
+# 3. bit-blasted: a difference at one point out of 2^32 is found by SAT and
+# re-checked by the evaluator
+needle(x: u32) = x == 123456789 ? 1 : 0
+zero(x: u32) = 0
+equiv needle zero
+
+# 4. definedness: one side is undefined where the other is not, and the
+# other way round
+q(x: i8, y: i8) = x / y
+q0(x: i8, y: i8) = y == 0 ? 7 : x / y
+equiv q q0
+equiv q0 q
+
+# 5. wrapping: the unsigned and signed wrap, with the input that wraps
+add(x: u8, y: u8) = x + y
+twice(x: i32) = x + x
+sub(x: i32, y: i32) = y - x
+wrap add
+wrap twice
+wrap sub
+
+# 6. where an operation is undefined, and where C's own arithmetic is
+dom(x: i32) = 100 / (x - 3)
+domain dom
+logdom(x: real) = log(x - 1)
+domain logdom
+
+# 7. how far an approximation is from its reference, at its worst input
+q5round(c: u8) = u8((u32(c) * 31 + 127) / 255)
+q5floor(c: u8) = u8(u32(c) * 31 / 255)
+error q5floor ~ q5round
+
+# 8. floating point: the difference is in the last bits, and named
+fsub(x: f32) = (x + 1.0f) - 1.0f
+same(x: f32) = x
+equiv fsub same
+
+# 9. the elements that break a law
+algebra quaternion commutative
+algebra octonion associative
+ring z/12 field
+ring z/8 zerodivisors

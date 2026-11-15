@@ -1,0 +1,114 @@
+> e4(v: u4) = u8(v) * 17
+> e4bits(v: u4) = u8((u8(v) << 4) | v)
+> e4round(v: u4) = u8((u32(v) * 255 + 7) / 15)
+> equiv e4bits e4
+e4bits and e4 are equal on the domain of e4bits (exhaustive)
+> equiv e4bits e4round
+e4bits and e4round are equal on the domain of e4bits (exhaustive)
+> w5(v: u5) = u8((u8(v) << 3) | (v >> 2))
+> w5mul(v: u5) = u8(8 * u32(v) + (u32(v) >> 2))
+> equiv w5 w5mul
+w5 and w5mul are equal on the domain of w5 (exhaustive)
+> w6(v: u6) = u8((u8(v) << 2) | (v >> 4))
+> w6mul(v: u6) = u8(4 * u32(v) + (u32(v) >> 4))
+> equiv w6 w6mul
+w6 and w6mul are equal on the domain of w6 (exhaustive)
+> w5round(v: u5) = u8((u32(v) * 255 + 15) / 31)
+> equiv w5 w5round
+w5 and w5round differ at 4 points, e.g. v=3: 24 vs 25
+> w6round(v: u6) = u8((u32(v) * 255 + 31) / 63)
+> equiv w6 w6round
+w6 and w6round differ at 10 points, e.g. v=11: 44 vs 45
+> gap5(v: u5) = i16(w5(v)) - (255 * i16(v)) / 31
+> range gap5
+range of gap5 -> i16:
+  0..1   (2 distinct values)
+  values: 0..1
+  fits in u1
+  over all 32 points of the domain
+> gap6(v: u6) = i16(w6(v)) - (255 * i16(v)) / 63
+> range gap6
+range of gap6 -> i16:
+  0..1   (2 distinct values)
+  values: 0..1
+  fits in u1
+  over all 64 points of the domain
+> q5(c: u8) = u8((u32(c) * 31 + 127) / 255)
+> q5floor(c: u8) = u8(u32(c) * 31 / 255)
+> q5fast(c: u8) = u8((u32(c) * 31 + 128) >> 8)
+> err5(c: u8) = abs(i16(w5(q5(c))) - i16(c))
+  note: argument 1 of w5 converted from u8 to u5
+> err5f(c: u8) = abs(i16(w5(q5floor(c))) - i16(c))
+  note: argument 1 of w5 converted from u8 to u5
+> range err5
+range of err5 -> i16:
+  0..4   (5 distinct values)
+  values: 0..4
+  fits in u3
+  over all 256 points of the domain
+> range err5f
+range of err5f -> i16:
+  0..8   (9 distinct values)
+  values: 0..8
+  fits in u4
+  over all 256 points of the domain
+> equiv q5 q5fast
+q5 and q5fast differ at 15 points, e.g. c=70: 9 vs 8
+> equiv q5 q5floor
+q5 and q5floor differ at 127 points, e.g. c=5: 1 vs 0
+> d5(b: u5, d: i3) = u5(i16(b) + i16(d))
+> dc5(b: u5, d: i3) = u5(min(31, max(0, i16(b) + i16(d))))
+> equiv d5 dc5
+d5 and dc5 differ at 16 points, e.g. b=0, d=-4: 28 vs 0
+> wrap d5
+wrap analysis of d5:
+  i16(b) + i16(d)   (i16)
+      nuw fails: unsigned wrap at 118 points, e.g. b=4, d=-4
+      nsw holds (C requires it: signed overflow is UB)
+  u5(i16(b) + i16(d))   (u5)
+      truncates at 16 points, e.g. b=0, d=-4
+  end to end: differs from the mathematical result at 16 points, e.g. b=0, d=-4
+  over all 256 points of the domain
+> dwd(b: u5, m: i3) = u8(w5(b) + i16(m))
+> dwc(b: u5, m: i3) = u8(min(255, max(0, i16(w5(b)) + i16(m))))
+> equiv dwd dwc
+dwd and dwc differ at 7 points, e.g. b=0, m=-4: 252 vs 0
+> res(b: u5, c: u8) = u8(c - w5(b))
+> resok(b: u5, c: u8) = i16(c) - i16(w5(b))
+> wrap res
+wrap analysis of res:
+  u8(b) << 3   (u8)
+      nuw holds
+      nsw fails: signed wrap at 4096 points, e.g. b=16, c=0
+  c - (u8(b) << 3 | u8(b >> 2))   (u8)
+      nuw fails: unsigned wrap at 4080 points, e.g. b=1, c=0
+      nsw fails: signed wrap at 1984 points, e.g. b=16, c=4
+  end to end: differs from the mathematical result at 4080 points, e.g. b=1, c=0
+  over all 8192 points of the domain
+> range resok
+range of resok -> i16:
+  -255..255   (511 distinct values)
+  fits in i9
+  over all 8192 points of the domain
+> sq16(d: i16 in -255..255) = i16(d * d)
+> sq32(d: i16 in -255..255) = i32(i32(d) * i32(d))
+> wrap sq16
+wrap analysis of sq16:
+  d*d   (i16)
+      nuw fails: unsigned wrap at 255 points, e.g. d=-255
+      nsw fails: signed wrap at 148 points, e.g. d=-255  <- UB in C; a compiler assumes it cannot happen
+  end to end: differs from the mathematical result at 148 points, e.g. d=-255
+      exact for: -181..181
+  over all 511 points of the domain
+> range sq32
+range of sq32 -> i32:
+  0..65025
+  fits in u16
+  over all 511 points of the domain
+> sum3(r: i16 in -255..255, g: i16 in -255..255, b: i16 in -255..255) = i32(r)*i32(r) + i32(g)*i32(g) + i32(b)*i32(b)
+> range sum3
+range of sum3 -> i32:
+  33..192542
+  fits in u18
+  sampled 65536 points (domain has 133432831 points); not exhaustive
+  sound bound (intervals): -195075..195075
